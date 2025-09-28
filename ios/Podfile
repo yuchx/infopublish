@@ -1,47 +1,39 @@
-# ios/Podfile  —— Flutter 项目通用稳定版
-platform :ios, '13.0'                  # 如需更低可改为 '12.0'（两处保持一致）
+# ios/Podfile —— Flutter 官方模板增强版（建议 iOS 13 起步）
+platform :ios, '13.0'
 
-use_frameworks! :linkage => :static    # 静态链接，兼容大多数 Flutter 插件
+use_frameworks! :linkage => :static
 use_modular_headers!
-
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
-# Xcode 构建配置映射（保持默认即可）
+# ！！关键：引入 Flutter 的 pod helper（提供 flutter_* 方法）
+require File.expand_path(File.join('Flutter', 'podhelper'), __dir__)
+
 project 'Runner', {
   'Debug' => :debug,
   'Profile' => :release,
   'Release' => :release,
 }
 
-# 仅保留 Runner 目标；若工程里没有 RunnerTests，就不要在这里写 RunnerTests
+# Flutter 的 iOS 预设
+flutter_ios_podfile_setup
+
 target 'Runner' do
+  # 安装所有 Flutter 插件依赖
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
-# CocoaPods 安装后的统一收尾
 post_install do |installer|
-  # 统一 iOS 部署版本、关闭 bitcode，避免个别 Pod 自带更低/更高版本导致不一致
-  deployment = '13.0'   # 若上面改成 12.0，这里也改成 '12.0'
-
+  # 将 Flutter 需要的额外构建设置注入到每个 Pod target
   installer.pods_project.targets.each do |t|
-    # 跳过空 target
-    next if t.respond_to?(:product_type) && t.product_type == 'com.apple.product-type.bundle'
+    flutter_additional_ios_build_settings(t)
 
     t.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = deployment
+      # 与上面的 platform 保持一致（如需 iOS 12，把两处都改成 '12.0'）
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      # Xcode 14+ 已弃用 Bitcode，统一关闭
       config.build_settings['ENABLE_BITCODE'] = 'NO'
-      # 避免部分 Pod 使用过时的 iOS 模拟器架构设置
-      # （通常无需改动；保留以提升兼容性）
-      config.build_settings['ONLY_ACTIVE_ARCH'] = 'NO'
-    end
-  end
-
-  # Xcode 15+ 下某些 Pod 的 Swift 版本未显式声明时，给个默认的 5.0
-  installer.generated_projects.each do |proj|
-    proj.targets.each do |t|
-      t.build_configurations.each do |config|
-        config.build_settings['SWIFT_VERSION'] ||= '5.0'
-      end
+      # 某些 Pod 未声明 Swift 版本时给默认值
+      config.build_settings['SWIFT_VERSION'] ||= '5.0'
     end
   end
 end
