@@ -1,0 +1,14 @@
+workflows:
+  build_and_test:                  
+    name: Build & Test           
+    triggering:                   
+      events:
+        - push
+        - pull_request
+      branch_patterns:
+        - pattern: "main"
+          include: true
+        - pattern: "release/*"
+          include: true
+    scripts:                       
+      - echo "Run your build here"
