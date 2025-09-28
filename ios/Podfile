@@ -1,38 +1,29 @@
-# ios/Podfile —— Flutter 官方模板增强版（建议 iOS 13 起步）
-platform :ios, '13.0'
+# ios/Podfile  —— Flutter 项目通用稳定版
+platform :ios, '13.0'                  # 如需更低可改为 '12.0'（两处保持一致）
 
-use_frameworks! :linkage => :static
+use_frameworks! :linkage => :static    # 静态链接，兼容大多数 Flutter 插件
 use_modular_headers!
+
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
-
-# ！！关键：引入 Flutter 的 pod helper（提供 flutter_* 方法）
 require File.expand_path(File.join('Flutter', 'podhelper'), __dir__)
-
+# Xcode 构建配置映射（保持默认即可）
 project 'Runner', {
   'Debug' => :debug,
   'Profile' => :release,
   'Release' => :release,
 }
-
-# Flutter 的 iOS 预设
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  # 安装所有 Flutter 插件依赖
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
-  # 将 Flutter 需要的额外构建设置注入到每个 Pod target
   installer.pods_project.targets.each do |t|
     flutter_additional_ios_build_settings(t)
-
     t.build_configurations.each do |config|
-      # 与上面的 platform 保持一致（如需 iOS 12，把两处都改成 '12.0'）
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
-      # Xcode 14+ 已弃用 Bitcode，统一关闭
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'  # 与上面一致
       config.build_settings['ENABLE_BITCODE'] = 'NO'
-      # 某些 Pod 未声明 Swift 版本时给默认值
       config.build_settings['SWIFT_VERSION'] ||= '5.0'
     end
   end
