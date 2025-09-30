@@ -162,10 +162,10 @@ class _FaceDetectorViewState extends State<FaceDetectorView> {
       //   'upnum':upnum
       // };
       // streamsdAddPeoImg.add('要上传的人脸画框');
-      playerMeet.stop();
-      playerMeet.setAsset(
-          'files/ding.mp3');
-      playerMeet.play();//播放ding的音效
+      // playerMeet.stop();
+      // playerMeet.setAsset(
+      //     'files/ding.mp3');
+      // playerMeet.play();//播放ding的音效
 
 // 裁剪更大的区域（含头部和上下留白）
       final faceImage = img.copyCrop(rgbImage!, x: cropX, y: cropY, width: cropW, height: cropH);

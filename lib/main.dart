@@ -15,7 +15,6 @@ import 'demo/listDate-demo.dart';
 import 'mqtt/MQTTManager.dart';
 import 'shareLocal.dart';
 
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:dio/dio.dart';
 
 import 'dart:ui';
@@ -23,15 +22,12 @@ import 'dart:ui';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
 import 'dart:io';
-//截取屏幕
-import 'package:screenshot/screenshot.dart';
 
 //定义两个全局变量用来预约时间
 var metOrderStartTime='';
 var metOrderEndTime='';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await FlutterDownloader.initialize(debug: true);
   runApp(new MyApp());
 }
 class MyApp extends StatefulWidget {

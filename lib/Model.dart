@@ -8,11 +8,8 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// import 'package:flutterapp/demo/postData.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:just_audio/just_audio.dart';
+// import 'package:just_audio/just_audio.dart';
 import 'package:ntp/ntp.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:restart_app/restart_app.dart';
@@ -286,7 +283,7 @@ var schplanlist = [];//所有的任务的总和
 
 List SignPeoList = [];//签到人员列表
 
-final playerMeet = AudioPlayer();//定义一个全局的音频----会议签到相关
+// final playerMeet = AudioPlayer();//定义一个全局的音频----会议签到相关
 //发送系统通知
 // FlutterLocalNotificationsPlugin? flutterLocalNotificationsPlugin;
 //steam检测

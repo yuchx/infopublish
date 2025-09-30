@@ -173,9 +173,9 @@ Future<void> uploadFaceData(timestamp, Uint8List sddata) async {
       // Fluttertoast.showToast(msg: "返回結果$responseBody");
       //Tag 0签到失败:没勾选签到\不到点或者过点  1签到成功   2您不在参会人员名单中  3你已签到  -1人脸模糊
       if ('${redataJson['Tag']}' == '1') {
-        playerMeet.setAsset(
-            'files/qiandaochenggong.mp3');//播放签到成功的音频
-        playerMeet.play();
+        // playerMeet.setAsset(
+        //     'files/qiandaochenggong.mp3');//播放签到成功的音频
+        // playerMeet.play();
 
         if(redataJson['Result']?.isNotEmpty == true){
           String TableCardName = '${redataJson['Result']['TableCardName']}';
