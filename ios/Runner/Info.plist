@@ -2,109 +2,71 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>$(DEVELOPMENT_LANGUAGE)</string>
 
-	<!-- 与 Android application label 对齐：应用显示名 -->
-	<key>CFBundleDisplayName</key>
-	<string>Info Template Publish</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>$(DEVELOPMENT_LANGUAGE)</string>
+  <key>CFBundleDisplayName</key>
+  <string>$(PRODUCT_NAME)</string>
+  <key>CFBundleExecutable</key>
+  <string>$(EXECUTABLE_NAME)</string>
+  <key>CFBundleIdentifier</key>
+  <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>$(PRODUCT_NAME)</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleShortVersionString</key>
+  <string>$(FLUTTER_BUILD_NAME)</string>
+  <key>CFBundleVersion</key>
+  <string>$(FLUTTER_BUILD_NUMBER)</string>
+  <key>LSRequiresIPhoneOS</key>
+  <true/>
 
-	<key>CFBundleExecutable</key>
-	<string>$(EXECUTABLE_NAME)</string>
-	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>webviewmeet_fluttertemplate</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>$(FLUTTER_BUILD_NAME)</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>$(FLUTTER_BUILD_NUMBER)</string>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
+  <key>UILaunchStoryboardName</key>
+  <string>LaunchScreen</string>
+  <key>UIMainStoryboardFile</key>
+  <string></string>
 
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
+  <key>UISupportedInterfaceOrientations</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+    <string>UIInterfaceOrientationLandscapeLeft</string>
+    <string>UIInterfaceOrientationLandscapeRight</string>
+  </array>
+  <key>UISupportedInterfaceOrientations~ipad</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+    <string>UIInterfaceOrientationPortraitUpsideDown</string>
+    <string>UIInterfaceOrientationLandscapeLeft</string>
+    <string>UIInterfaceOrientationLandscapeRight</string>
+  </array>
 
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
+  <key>NSCameraUsageDescription</key>
+  <string>需要使用相机进行拍摄。</string>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>需要使用麦克风录制音频。</string>
+  <key>NSPhotoLibraryUsageDescription</key>
+  <string>需要访问相册以选择/保存图片。</string>
+  <key>NSPhotoLibraryAddUsageDescription</key>
+  <string>需要保存图片到相册。</string>
 
-	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<false/>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
+  <key>BGTaskSchedulerPermittedIdentifiers</key>
+  <array>
+    <string>vn.hunghd.flutter_downloader</string>
+  </array>
+  <key>UIBackgroundModes</key>
+  <array>
+    <string>fetch</string>
+    <string>processing</string>
+  </array>
 
-	<!-- ========== 下面是与 AndroidManifest 权限的对应 ========== -->
-
-	<!-- 相机：对应 android.permission.CAMERA -->
-	<key>NSCameraUsageDescription</key>
-	<string>需要使用相机用于扫码/拍照上传</string>
-
-	<!-- 麦克风：Android 有修改音频设置；若会录音则需声明 -->
-	<key>NSMicrophoneUsageDescription</key>
-	<string>需要使用麦克风用于录音或音视频通话</string>
-
-	<!-- 相册读/写：对应外部存储读写 -->
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>需要访问相册以选择与上传文件</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>需要保存图片或视频到您的相册</string>
-
-	<!-- 定位：对应 ACCESS_FINE_LOCATION（仅前台定位） -->
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>需要获取位置信息以提供位置相关服务</string>
-	<!-- 若确实需要后台定位，再取消注释并在 Capabilities 勾选 Location updates
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>在后台持续获取位置用于位置相关服务</string>
-	-->
-
-	<!-- 允许 HTTP 明文流量：对应 usesCleartextTraffic="true"
-	     更安全的做法是按域名豁免（见注释） -->
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-		<!-- 推荐写成域名白名单：
-		<key>NSExceptionDomains</key>
-		<dict>
-			<key>your.domain.com</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key><true/>
-				<key>NSIncludesSubdomains</key><true/>
-			</dict>
-		</dict>
-		-->
-	</dict>
-
-	<!-- 如需“近似保活/自启”能力，可考虑后台模式（与 Android 前台服务/开机广播不等价）
-	     使用到再取消注释，并到 Signing & Capabilities 勾选 Background Modes 相应项
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>                <!-- 后台拉取 -->
-		<string>remote-notification</string>  <!-- 静默推送唤醒 -->
-		<!-- 若需后台定位再加：<string>location</string> -->
-	</array>
-	-->
+  <key>CFBundleLocalizations</key>
+  <array>
+    <string>en</string>
+    <string>zh_CN</string>
+  </array>
 
 </dict>
 </plist>
