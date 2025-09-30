@@ -1,4 +1,4 @@
-package com.tonle.webviewmeet_fluttertemplate;
+package com.tonle.webviewmeetfluttertemplate;
 
 import android.Manifest;
 import android.app.Activity;
