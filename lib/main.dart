@@ -3,35 +3,22 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:screen_state/screen_state.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 import 'vision_detector_views/cameraSignPart.dart';
 import 'demo/localfileUseSetting.dart';
 import 'demo/myselfmarquee.dart';
-import 'demo/updateApp.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'demo/TimerWidget.dart';
 import 'demo/messagePage.dart';//填写信息的页面
 import 'Model.dart';
-import 'HttpHelper.dart';
 import 'demo/listview-demo.dart';
 import 'demo/listDate-demo.dart';
-import 'demo/theme_base.dart';
 import 'mqtt/MQTTManager.dart';
 import 'shareLocal.dart';
-import 'demo/common.dart';
-import 'demo/viewDown.dart';
 
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:dio/dio.dart';
 
-import 'dart:isolate';
 import 'dart:ui';
-
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
@@ -42,10 +29,8 @@ import 'package:screenshot/screenshot.dart';
 //定义两个全局变量用来预约时间
 var metOrderStartTime='';
 var metOrderEndTime='';
-// void main() => runApp(MyApp());
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // //初始化FlutterDownloader
   await FlutterDownloader.initialize(debug: true);
   runApp(new MyApp());
 }
@@ -54,87 +39,35 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 class _MyAppState extends State<MyApp> {
-  Screen _screen = Screen();
-  StreamSubscription<ScreenStateEvent> ?_subscription;
-  //订阅一个原生代码写的信道，该信道是用来传递U盘的状态改变情况的
-  static const platform = MethodChannel('myUsbBroReceiver');
   void initState() {
     super.initState();
-    initPlatformState();
-    platform.setMethodCallHandler(_handleMethod);
-  }
-  Future<void> initPlatformState() async {
-    print(_screen);
-    startListening();
-  }
-  Future<void> _handleMethod(MethodCall call) async {
-    switch (call.method) {
-      case 'usbAttached':
-        getUSBImg();// 处理USB插入事件
-        break;
-      case 'usbDetached':
-      // 处理USB拔出事件
-      //   setState(() {
-      //     _counter='111';
-      //   });
-        break;
-      default:
-        print('其它未知方法');
-    }
-  }
-  void onData(ScreenStateEvent event) {
-    print(event);
-    deviceLogAdd(1213,"当前屏幕状态${event.name}","当前屏幕状态${event.name}！$deviceID");
-    //应该判断一下屏幕的开关状态
-    // if(event.name=="SCREEN_ON"){
-      // keepscreenLight(1);//保持屏幕常亮
-    // }else{
-      // keepscreenLight(0);//取消屏幕常亮
-    // }
-  }
-
-  void startListening() {
-    try {
-      _subscription = _screen.screenStateStream.listen(onData);
-      print('object');
-    } on ScreenStateException catch (exception) {
-      print(exception);
-    }
-  }
-
-  void stopListening() {
-    _subscription?.cancel();
   }
   @override
   Widget build(BuildContext context) {
     getLocalMess();//获取storage里的内容
-    getnowpro();//实时获取正在播放的节目--遍历数据
-    WakelockPlus.enable();//屏幕常亮
     DateTime ?lastPopTime;
-    return Screenshot(
-        controller: screenshotController,
-        child:MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home:Scaffold(
-              resizeToAvoidBottomInset:false,//控制界面内容body,防止键盘弹出后页面比例改变
-              backgroundColor: Colors.transparent, //把scaffold的背景色改成透明
-              body:WillPopScope(
-                  child: MyHomePage(title: '1', key: Key('123'),),
-                  onWillPop: () async {
-                    if (lastPopTime == null ||DateTime.now().difference(lastPopTime!) > Duration(seconds: 1)) {
-                      lastPopTime = DateTime.now();
-                      Fluttertoast.showToast(msg: '再按一次退出程序');
-                      return Future.value(false);
-                    } else {
-                      lastPopTime = DateTime.now();
-                      // SystemNavigator.pop();
-                      exit(0); // 退出app
-                      return Future.value(true);
-                    }
-                  }
-              )
-          ),
-        )
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home:Scaffold(
+          resizeToAvoidBottomInset:false,//控制界面内容body,防止键盘弹出后页面比例改变
+          backgroundColor: Colors.transparent, //把scaffold的背景色改成透明
+          body:WillPopScope(
+              child: MyHomePage(title: '1', key: Key('123'),),
+              onWillPop: () async {
+                if (Platform.isIOS) { return false; }//ios平台不支持
+                if (lastPopTime == null ||DateTime.now().difference(lastPopTime!) > Duration(seconds: 1)) {
+                  lastPopTime = DateTime.now();
+                  Fluttertoast.showToast(msg: '再按一次退出程序');
+                  return Future.value(false);
+                } else {
+                  lastPopTime = DateTime.now();
+                  // SystemNavigator.pop();
+                  exit(0); // 退出app
+                  return Future.value(true);
+                }
+              }
+          )
+      ),
     );
   }
 }
@@ -143,7 +76,6 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-//  _MyHomePageState createState() => _MyHomePageState();
   State<StatefulWidget> createState() => _MyHomePageState();
 }
 
@@ -156,30 +88,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver{
       DeviceOrientation.landscapeLeft,
     ]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);//隐藏状态栏
-    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
-    var android = new AndroidInitializationSettings('@mipmap/ic_launcher');
-    var initSetttings = new InitializationSettings(android:android);
-    flutterLocalNotificationsPlugin?.initialize(initSetttings);
     initPlatSocketState();
-  //整个APP的背景图的地址
-    StorageUtil.getStringItem('bgImg').then((nowbgpathR) async {
-      if(nowbgpathR!=null&&nowbgpathR!='null'&&nowbgpathR!=''){
-        File filebgimg = File(nowbgpathR);
-        //读缓存里的背景图的地址
-        bool imageExists = filebgimg.existsSync();
-        if (imageExists) {
-          print('图片存在-------------------------------');
-          backimgAll = FileImage(filebgimg);//整个APP的背景图
-        } else {
-          print('图片不存在---------------------');
-        }
-      }
-    });
-
-
   }
   Future<void> initPlatSocketState() async {
-
     if (!mounted) return;
     setState(() {
       configureindexConnect();//连接MQTT
@@ -199,8 +110,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver{
               decoration: BoxDecoration(
                   color:  Colors.white,
                   image: DecorationImage(
-                    image: backimgAll,
-                    // image: FileImage(File('$viewbgImg1')),
+                    image: AssetImage('images/backImg.png'),
                     fit: BoxFit.fill,
                   )),
               child: Center(
@@ -209,11 +119,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver{
             );
           }
       );
-
-
-
-
-
   }
 }
 //会议室默认名称
@@ -280,8 +185,6 @@ class _statemeetClassNameAfter extends State<meetClassNameAfter>{
 
   }
 }
-
-
 //会议室默认名称---摄像头签到版本用--后来更改的
 class meetClassNameSignTop extends StatefulWidget{
   @override
@@ -408,13 +311,6 @@ class StackListBottom extends StatelessWidget{
                     height: ScreenUtil().setHeight(330),
                     child:ListViewDataDemo(),//会议列表
                   ),
-                  Positioned(
-                      left:ScreenUtil().setWidth(600),
-                      top:ScreenUtil().setHeight(280),
-                      child:cenNewDownApp()//更新APP的内容
-                  ),
-                  hotloadbor(),//热更新的弹出遮罩层
-                  InsertText(),//插播字幕相关部分
                   //设置按钮
                   Positioned(
                     left:ScreenUtil().setWidth(1840),
@@ -459,13 +355,7 @@ class StackListBottom extends StatelessWidget{
                     height: ScreenUtil().setHeight(320),
                     child:ListViewDataDemo(),//会议列表
                   ),
-                  Positioned(
-                      left:ScreenUtil().setWidth(600),
-                      top:ScreenUtil().setHeight(280),
-                      child:cenNewDownApp()//更新APP的内容
-                  ),
                   hotloadbor(),//热更新的弹出遮罩层
-                  InsertText(),//插播字幕相关部分
                   //设置按钮
                   Positioned(
                     left:ScreenUtil().setWidth(1840),
@@ -543,10 +433,10 @@ class StackListBottom extends StatelessWidget{
                     height: havePro==2?ScreenUtil().setHeight(1080):ScreenUtil().setHeight(703),
                     width: havePro==2?ScreenUtil().setWidth(1920):ScreenUtil().setWidth(1250),
                     child: Container(
-                      child: viewPart(),
-                      decoration: BoxDecoration(
-                        // color: Color.fromRGBO(0, 0, 0, 1),
-                      ),
+                      // child: viewPart(),
+                      // decoration: BoxDecoration(
+                      //   // color: Color.fromRGBO(0, 0, 0, 1),
+                      // ),
                     ),
                   ),
                   //右侧二维码部分上方ICON
@@ -571,13 +461,6 @@ class StackListBottom extends StatelessWidget{
                     height: ScreenUtil().setHeight(320),
                     child:ListViewDataDemo(),//会议列表
                   ),
-                  Positioned(
-                      left:ScreenUtil().setWidth(600),
-                      top:ScreenUtil().setHeight(280),
-                      child:cenNewDownApp()//更新APP的内容
-                  ),
-                  hotloadbor(),//热更新的弹出遮罩层
-                  InsertText(),//插播字幕相关部分
                   //设置按钮
                   Positioned(
                     left:havePro==1?ScreenUtil().setWidth(582):ScreenUtil().setWidth(1840),
@@ -683,158 +566,7 @@ class hotloadbor extends StatelessWidget{
     );
   }
 }
-//插播字幕相关内容
-class InsertText extends StatelessWidget{
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return StreamBuilder(
-        stream: streaminsert.stream,
-        builder:(context,snapshot){
-          if(playinsertId=='0'){
-            //没有插播的消息展示
-            return Container();
-          }else{
-            //有插播的消息展示
-            //滚动的消息内容
-            var messInsertNow = "-";
-            if('${insertmess['Message']}'!=''){
-              messInsertNow = '${insertmess['Message']}';
-            }
-            //字体
-            var FontName = "微软雅黑";
-            if('${insertmess['FontName']}'!=''){
-              if('${insertmess['FontName']}'=="黑体"){
-                FontName = 'SimHei';
-              }else if('${insertmess['FontName']}'=="宋体"){
-                FontName = 'SimSun';
-              }else if('${insertmess['FontName']}'=="楷体"){
-                FontName = 'KaiTi';
-              }else if('${insertmess['FontName']}'=="隶书"){
-                FontName = 'LiSu';
-              }else if('${insertmess['FontName']}'=="幼圆"){
-                FontName = 'YouYuan';
-              }else if('${insertmess['FontName']}'=="新魏"){
-                FontName = 'STXinwei';
-              }else if('${insertmess['FontName']}'=="仿宋体"){
-                FontName = 'FangSong';
-              }
-              // FontName = '${insertmess['FontName']}';
-            }
-            //字号
-            var FontSize = 32;
-            double fontheight = 40;
-            if('${insertmess['FontSize']}'!=''){
-              FontSize = int.parse('${insertmess['FontSize']}');
-              fontheight = FontSize*1.25;
-            }
-            //字的颜色
-            var MessageColor = Color.fromRGBO(0, 0, 0, 1);//黑色
-            if('${insertmess['MessageColor']}'.indexOf('rgba')>=0){
-              //rgba格式的
-              var Colorteall ='${insertmess['MessageColor']}'.split('(')[1].split(')')[0];
-              var ColorteA = int.parse('${Colorteall.split(',')[0]}');
-              var ColorteB = int.parse('${Colorteall.split(',')[1]}');
-              var ColorteC = int.parse('${Colorteall.split(',')[2]}');
-              var ColorteD = double.parse('${Colorteall.split(',')[3]}');
-              MessageColor = Color.fromRGBO(ColorteA, ColorteB, ColorteC, ColorteD);
-            }else if('${insertmess['MessageColor']}'.indexOf('rgb')>=0){
-              //rgb格式的
-              var Colorteall ='${insertmess['MessageColor']}'.split('(')[1].split(')')[0];
-              var ColorteA = int.parse('${Colorteall.split(',')[0]}');
-              var ColorteB = int.parse('${Colorteall.split(',')[1]}');
-              var ColorteC = int.parse('${Colorteall.split(',')[2]}');
-              MessageColor = Color.fromRGBO(ColorteA, ColorteB, ColorteC, 1);
-            }
-            //滚动字幕的背景
-            var BackColor = Colors.transparent;
-            if('${insertmess['BackColor']}'=='rgb(255,0,0)'){
-              //红色
-              BackColor = Colors.red;
-            }else if('${insertmess['BackColor']}'=='rgb(0,255,0)'){
-              //绿色
-              BackColor = Colors.green;
-            }else if('${insertmess['BackColor']}'=='rgb(0,0,255)'){
-              //蓝色
-              BackColor = Colors.blue;
-            }else if('${insertmess['BackColor']}'=='rgb(255,255,255)'){
-              //白色
-              BackColor = Colors.white;
-            }
-            var Durtnum= 20;//正常
-            //滚动速度
-            if('${insertmess['Speed']}'=='5'){
-              Durtnum= 40;//慢 40
-            }else if('${insertmess['Speed']}'=='10'){
-              Durtnum= 20;//正常 20
-            }else if('${insertmess['Speed']}'=='20'){
-              Durtnum= 10;//快 10
-            }else if('${insertmess['Speed']}'=='40'){
-              Durtnum= 5;//超快 5
-            }
-            if('${insertmess['Dock']}'=='1'){
-              //上方
-              return Positioned(
-                  left: 0,
-                  top:0,
-                  child: Container(
-                    width: ScreenUtil().setWidth(1920),
-                    height: ScreenUtil().setHeight(fontheight),
-                    color: BackColor,
-                    child: YYMarquee(
-                        Text(
-                          '$messInsertNow',
-                          style:TextStyle(
-                              fontSize: ScreenUtil().setSp(FontSize),
-                              color: MessageColor,
-                              fontFamily: '$FontName',
-                              height:1.25,
-                              decoration: TextDecoration.none
-                          ),
-                        ),
-                        ScreenUtil().setWidth(10),
-                        new Duration(seconds: Durtnum),
-                        ScreenUtil().setWidth(1920)
-                    ),
-                  )
-              );
-            }else{
-              //不是上方的一律认为是下方
-              return Positioned(
-                  left: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: ScreenUtil().setWidth(1920),
-                    height: ScreenUtil().setHeight(fontheight),
-                    color: BackColor,
-                    child: YYMarquee(
-                        Text(
-                          '$messInsertNow',
-                          style:TextStyle(
-                              fontSize: ScreenUtil().setSp(FontSize),
-                              color: MessageColor,
-                              fontFamily: '$FontName',
-                              height:1.25,
-                              decoration: TextDecoration.none
-                          ),
-                        ),
-                        ScreenUtil().setWidth(10),
-                        new Duration(seconds: Durtnum),
-                        ScreenUtil().setWidth(1920)
-                    ),
-                  )
-              );
-            }
 
-          }
-
-        });
-
-
-
-  }
-
-}
 //设置按钮
 class topsetbtn extends StatelessWidget{
   Widget build(BuildContext context) {
@@ -875,7 +607,6 @@ class topsetbtn extends StatelessWidget{
                   contentTextStyle: TextStyle(color: Colors.black,decoration: TextDecoration.none, fontSize: ScreenUtil().setSp(40), fontWeight: FontWeight.w300),
                   contentPadding: EdgeInsets.all(ScreenUtil().setWidth(30)),
                   elevation: 10.0,
-                  //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(14.0))),
                   actions: <Widget>[
                     TextButton(child: Text("确定"), onPressed: (){
                       if(passwordInput=="1234"){

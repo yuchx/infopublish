@@ -48,29 +48,13 @@ getDeviceInfo() async {
   if(Platform.isAndroid) {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     await _readAndroidBuildData(androidInfo);
-//    print();
-    print("*************************************");
   } else if (Platform.isIOS) {
     IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
     _readIosDeviceInfo(iosInfo);
-    //print(_readIosDeviceInfo(iosInfo).toString());
-    //print("*************************************");
   }
 }
 //安卓获取设备信息
 Future<Map<String, dynamic>> _readAndroidBuildData(AndroidDeviceInfo build) async {
- // DeviceInfo deviceInfoMessage = DeviceInfo();
-//  deviceInfoMessage.DeviceId = build.androidId;//deviceId设备ID
-//  deviceInfoMessage.DeviceName = build.version.codename;//deviceId设备名称
-//  deviceInfoMessage.DeviceVersion = build.model;//DeviceVersion
-//  deviceInfoMessage.SystemVersion = 'android'+build.version.release;//SystemVersion
-
-//  print(build);
-
-//获取缓存文件里的
-//   createAndWriteToFile();
-
-
   try {
     // 获取设备上的文档目录（通常是根目录）的引用
     // Directory directory = await getExternalStorageDirectory();
@@ -110,65 +94,83 @@ Future<Map<String, dynamic>> _readAndroidBuildData(AndroidDeviceInfo build) asyn
   DeviceInfo['DeviceName'] = build.model;//deviceId设备名称
   DeviceInfo['DeviceVersion'] = build.model;//DeviceVersion
   DeviceInfo['SystemVersion'] = 'android'+build.version.release;//SystemVersion
-  // var imeiNo = '';
-  // try {
-  //   imeiNo = await DeviceInformation.deviceIMEINumber;
-  // } catch(e) {
-  //   imeiNo = '';
-  // }
-
   return <String, dynamic>{
   'DeviceId' :build.id,//deviceId设备ID
   'DeviceName' : build.model,//deviceId设备名称
   'DeviceVersion' :build.model,//DeviceVersion
   'SystemVersion' :'android'+build.version.release,//SystemVersion
   };
-//  return <String, dynamic>{
-//    'version.securityPatch': build.version.securityPatch,
-//    'version.sdkInt': build.version.sdkInt,
-//    'version.release': build.version.release,
-//    'version.previewSdkInt': build.version.previewSdkInt,
-//    'version.incremental': build.version.incremental,
-//    'version.codename': build.version.codename,
-//    'version.baseOS': build.version.baseOS,
-//    'board': build.board,
-//    'bootloader': build.bootloader,
-//    'brand': build.brand,
-//    'device': build.device,
-//    'display': build.display,
-//    'fingerprint': build.fingerprint,
-//    'hardware': build.hardware,
-//    'host': build.host,
-//    'id': build.id,
-//    'manufacturer': build.manufacturer,
-//    'model': build.model,
-//    'product': build.product,
-//    'supported32BitAbis': build.supported32BitAbis,
-//    'supported64BitAbis': build.supported64BitAbis,
-//    'supportedAbis': build.supportedAbis,
-//    'tags': build.tags,
-//    'type': build.type,
-//    'isPhysicalDevice': build.isPhysicalDevice,
-//    'androidId': build.androidId
-//  };
 }
 //IOS获取设备信息
-Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
+// IOS获取设备信息
+Future<Map<String, dynamic>> _readIosDeviceInfo(IosDeviceInfo data) async {
+  try {
+    // iOS 没有 Android 那样的公共目录，这里用应用沙盒的 Document 目录保存
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/deviceInfo.txt';
+    final file = File(filePath);
+
+    if (await file.exists()) {
+      print('文件已存在');
+    } else {
+      await file.create();
+      print('文件不存在，已成功创建');
+    }
+
+    String fileContent = await file.readAsString();
+    print('iOS 文件内容: $fileContent');
+
+    var deviceidbefor = data.identifierForVendor ?? ""; // iOS 提供的唯一标识（可能为null）
+    if (fileContent.isEmpty) {
+      var uuid = Uuid();
+      var uuidv4 = uuid.v4();
+      var savecode =
+      md5.convert(utf8.encode('$deviceidbefor$uuidv4')).toString();
+      await file.writeAsString(savecode);
+      DeviceInfo['DeviceId'] = savecode;
+    } else {
+      DeviceInfo['DeviceId'] = fileContent;
+    }
+
+    print('iOS 唯一标识写入成功: $filePath');
+  } catch (e) {
+    print('iOS 获取唯一标识文件出错：$e');
+    deviceLogAdd(-1, 'iOS 获取唯一标识文件出错 ${data.identifierForVendor}',
+        'iOS 获取唯一标识文件出错 ${data.identifierForVendor}');
+    DeviceInfo['DeviceId'] = data.identifierForVendor ?? "unknown";
+  }
+
+  // 统一封装 DeviceInfo
+  DeviceInfo['DeviceName'] = data.name;
+  DeviceInfo['DeviceVersion'] = data.model;
+  DeviceInfo['SystemVersion'] = '${data.systemName} ${data.systemVersion}';
+
   return <String, dynamic>{
-    'name': data.name,
-    'systemName': data.systemName,
-    'systemVersion': data.systemVersion,
-    'model': data.model,
-    'localizedModel': data.localizedModel,
-    'identifierForVendor': data.identifierForVendor,
-    'isPhysicalDevice': data.isPhysicalDevice,
-    'utsname.sysname:': data.utsname.sysname,
-    'utsname.nodename:': data.utsname.nodename,
-    'utsname.release:': data.utsname.release,
-    'utsname.version:': data.utsname.version,
-    'utsname.machine:': data.utsname.machine,
+    'DeviceId': DeviceInfo['DeviceId'],
+    'DeviceName': data.name,
+    'DeviceVersion': data.model,
+    'SystemVersion': '${data.systemName} ${data.systemVersion}',
   };
 }
+
+
+
+// Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
+//   return <String, dynamic>{
+//     'name': data.name,
+//     'systemName': data.systemName,
+//     'systemVersion': data.systemVersion,
+//     'model': data.model,
+//     'localizedModel': data.localizedModel,
+//     'identifierForVendor': data.identifierForVendor,
+//     'isPhysicalDevice': data.isPhysicalDevice,
+//     'utsname.sysname:': data.utsname.sysname,
+//     'utsname.nodename:': data.utsname.nodename,
+//     'utsname.release:': data.utsname.release,
+//     'utsname.version:': data.utsname.version,
+//     'utsname.machine:': data.utsname.machine,
+//   };
+// }
 
 
 //常见文件a.txt并写入文件内容
@@ -253,7 +255,6 @@ Map<String, dynamic> ajaxDataValue = {
 var ajaxData = {
   'RoomName':ajaxDataValue['RoomName'],
   'currentAddData': '',
-  'currentAddData': '',
   'ScheduleTable': ajaxDataValue['ScheduleTable'],
   'meetList':[],
   'CurrentName': "",
@@ -287,7 +288,7 @@ List SignPeoList = [];//签到人员列表
 
 final playerMeet = AudioPlayer();//定义一个全局的音频----会议签到相关
 //发送系统通知
-FlutterLocalNotificationsPlugin? flutterLocalNotificationsPlugin;
+// FlutterLocalNotificationsPlugin? flutterLocalNotificationsPlugin;
 //steam检测
 StreamController<String> streamDemo= StreamController.broadcast();//节目相关
 StreamController<String> streamtemplate= StreamController.broadcast();//模板相关
@@ -310,24 +311,8 @@ void hideshowhotload(val){
   showhotload = val;//要不要展示下载的动画  0不展示 1展示
   streamhotload.add('$showhotload');
 }
-// 获取应用程序的版本号（不是热更新的版本号）
-Future<void> getappVison() async {
-  String version = await getAndroidManifestVersion();
-  print('AndroidManifest.xml中的版本号: $version');
-  Fluttertoast.showToast(msg: "AndroidManifest.xml中的版本号：$version");
-}
-//删除根目录下的某个文件
-// Future<void> deleapplocalImg(furl) async {
-//   try {
-//     //获取设备根目录
-//     var directory = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
-//     File fileToDelete = File('${directory}$furl');
-//     // 删除文件
-//     await fileToDelete.delete(recursive: true);
-//   } catch (e) {
-//     print(e);
-//   }
-// }
+
+
 //更改会议室名称以及会议室二维码
 void meetnamechange(val){
   streamDemo.add('${val}${meetRoomCodeUrl}');
@@ -601,84 +586,84 @@ deviceLogAdd(datatype,dataContent,module) async{
   }
 }
 //走接口来提交保存更新状态接口
-devicehotUpAdd(upstaval) async{
-  var deviceid = await StorageUtil.getStringItem('deviceID');
-  String versionN = await getAndroidManifestVersion();
-  print('AndroidManifest.xml中的版本号: $versionN');
-  var uptime=getDataNowNtp();
-  var bodySend = {
-    'DeviceId':'$deviceid',
-    'UpdateStatus':'$upstaval',
-    'AppId':myAppId,
-    'VersionName':versionN,
-    'VersionNumber':myhotversionNum,
-    'UpdateDate':uptime
-  };
-  print(bodySend);
-  var headersSend = {
-    "Authorization":""
-  };
-
-  var posalUrlGetToken = 'http://$posalUrl:$posalport';
-  HttpDioHelper helper = HttpDioHelper();
-  helper.httpDioGet(posalUrlGetToken, "/InfoPublish/RegisterPlayer/AppUpdate",headers:headersSend,body:bodySend).then((datares) {
-    print("-------走接口来提交保存更新状态接口-----------");
-  });
-}
-devicehotUpAddNew(upstaval) async{
-  var deviceid = await StorageUtil.getStringItem('deviceID');
-  String versionN = await getAndroidManifestVersion();
-  print('AndroidManifest.xml中的版本号: $versionN');
-  var uptime=getDataNowNtp();
-  var bodySend = {
-    'DeviceId':'$deviceid',
-    'UpdateStatus':'$upstaval',
-    'AppId':myAppId,
-    'VersionName':versionN,
-    'VersionNumber':myhotversionNum,
-    'UpdateDate':uptime
-  };
-  print(bodySend);
-  var headersSend = {
-    "Authorization":""
-  };
-
-  await StorageUtil.setStringItem('upstanum','1');//upstanum 1更新进来的 0正常进入 2热更新步骤还未走完退出APP后进来的
-  var upstanumNow = await StorageUtil.getStringItem('upstanum');//upstanum 1更新进来的 0正常进入 2热更新步骤还未走完退出APP后进来的
-  Fluttertoast.showToast(msg: "upstanum:$upstanumNow");
-  var posalUrlGetToken = 'http://$posalUrl:$posalport';
-  HttpDioHelper helper = HttpDioHelper();
-  helper.httpDioGet(posalUrlGetToken, "/InfoPublish/RegisterPlayer/AppUpdate",headers:headersSend,body:bodySend).then((datares) {
-    print("------走接口来提交保存更新状态接口2-----------");
-    // 调用重新启动应用程序方法
-    Restart.restartApp();//插件版的重新启动应用程序方法
-  });
-}
-//一进程序来提交保存更新状态接口
-deviceNowAdd() async{
-  var deviceid = await StorageUtil.getStringItem('deviceID');
-  String versionN = await getAndroidManifestVersion();
-  print('AndroidManifest.xml中的版本号: $versionN');
-  var bodySend = {
-    'DeviceId':'$deviceid',
-    'AppId':myAppId,
-    'VersionName':versionN,
-    'VersionNumber':myhotversionNum,
-  };
-  print(bodySend);
-  var headersSend = {
-    "Authorization":""
-  };
-
-  var posalUrlGetToken = 'http://$posalUrl:$posalport';
-  if('$posalUrl'!=''){
-    HttpDioHelper helper = HttpDioHelper();
-    helper.httpDioGet(posalUrlGetToken, "/InfoPublish/RegisterPlayer/AppUpdate",headers:headersSend,body:bodySend).then((datares) {
-      print("---------一进程序来提交保存更新状态接口---------");
-    });
-  }
-
-}
+// devicehotUpAdd(upstaval) async{
+//   var deviceid = await StorageUtil.getStringItem('deviceID');
+//   String versionN = await getAndroidManifestVersion();
+//   print('AndroidManifest.xml中的版本号: $versionN');
+//   var uptime=getDataNowNtp();
+//   var bodySend = {
+//     'DeviceId':'$deviceid',
+//     'UpdateStatus':'$upstaval',
+//     'AppId':myAppId,
+//     'VersionName':versionN,
+//     'VersionNumber':myhotversionNum,
+//     'UpdateDate':uptime
+//   };
+//   print(bodySend);
+//   var headersSend = {
+//     "Authorization":""
+//   };
+//
+//   var posalUrlGetToken = 'http://$posalUrl:$posalport';
+//   HttpDioHelper helper = HttpDioHelper();
+//   helper.httpDioGet(posalUrlGetToken, "/InfoPublish/RegisterPlayer/AppUpdate",headers:headersSend,body:bodySend).then((datares) {
+//     print("-------走接口来提交保存更新状态接口-----------");
+//   });
+// }
+// devicehotUpAddNew(upstaval) async{
+//   var deviceid = await StorageUtil.getStringItem('deviceID');
+//   String versionN = await getAndroidManifestVersion();
+//   print('AndroidManifest.xml中的版本号: $versionN');
+//   var uptime=getDataNowNtp();
+//   var bodySend = {
+//     'DeviceId':'$deviceid',
+//     'UpdateStatus':'$upstaval',
+//     'AppId':myAppId,
+//     'VersionName':versionN,
+//     'VersionNumber':myhotversionNum,
+//     'UpdateDate':uptime
+//   };
+//   print(bodySend);
+//   var headersSend = {
+//     "Authorization":""
+//   };
+//
+//   await StorageUtil.setStringItem('upstanum','1');//upstanum 1更新进来的 0正常进入 2热更新步骤还未走完退出APP后进来的
+//   var upstanumNow = await StorageUtil.getStringItem('upstanum');//upstanum 1更新进来的 0正常进入 2热更新步骤还未走完退出APP后进来的
+//   Fluttertoast.showToast(msg: "upstanum:$upstanumNow");
+//   var posalUrlGetToken = 'http://$posalUrl:$posalport';
+//   HttpDioHelper helper = HttpDioHelper();
+//   helper.httpDioGet(posalUrlGetToken, "/InfoPublish/RegisterPlayer/AppUpdate",headers:headersSend,body:bodySend).then((datares) {
+//     print("------走接口来提交保存更新状态接口2-----------");
+//     // 调用重新启动应用程序方法
+//     Restart.restartApp();//插件版的重新启动应用程序方法
+//   });
+// }
+// //一进程序来提交保存更新状态接口
+// deviceNowAdd() async{
+//   var deviceid = await StorageUtil.getStringItem('deviceID');
+//   String versionN = await getAndroidManifestVersion();
+//   print('AndroidManifest.xml中的版本号: $versionN');
+//   var bodySend = {
+//     'DeviceId':'$deviceid',
+//     'AppId':myAppId,
+//     'VersionName':versionN,
+//     'VersionNumber':myhotversionNum,
+//   };
+//   print(bodySend);
+//   var headersSend = {
+//     "Authorization":""
+//   };
+//
+//   var posalUrlGetToken = 'http://$posalUrl:$posalport';
+//   if('$posalUrl'!=''){
+//     HttpDioHelper helper = HttpDioHelper();
+//     helper.httpDioGet(posalUrlGetToken, "/InfoPublish/RegisterPlayer/AppUpdate",headers:headersSend,body:bodySend).then((datares) {
+//       print("---------一进程序来提交保存更新状态接口---------");
+//     });
+//   }
+//
+// }
 //获取storage里的内容
 void getLocalMess() async {
 //  posalUrl='172.16.10.105';//服务器地址
@@ -722,85 +707,33 @@ void getLocalMess() async {
   MqttPassword = isNullKong(MqttPasswordR);
   upanName = isNullKong(upanNameR);
 //上一次的开关屏状态
-  var lockstateR =await StorageUtil.getStringItem('lockstate');//
-  isKeptOn = isNullboolLock(lockstateR);//屏幕是否打开,把他的状态缓存到APP中----因为看门狗拉起来的时候有可能是关屏状态
-  // bool? result = await isLockScreen();//锁着是true  开着是false
-  bool? result = await myjavaisScreenOn();
-  if(result==true){
-    // isKeptOn = false;
-    isKeptOn = true;
-  }else{
-    // isKeptOn = true;
-    isKeptOn = false;
-  }
+//   var lockstateR =await StorageUtil.getStringItem('lockstate');//
+//   isKeptOn = isNullboolLock(lockstateR);//屏幕是否打开,把他的状态缓存到APP中----因为看门狗拉起来的时候有可能是关屏状态
+//   // bool? result = await isLockScreen();//锁着是true  开着是false
+//   bool? result = await myjavaisScreenOn();
+//   if(result==true){
+//     // isKeptOn = false;
+//     isKeptOn = true;
+//   }else{
+//     // isKeptOn = true;
+//     isKeptOn = false;
+//   }
 
-  var nowbgpathR = await StorageUtil.getStringItem('bgImg');//整个APP的背景图的地址
-  if(nowbgpathR!=null&&nowbgpathR!='null'&&nowbgpathR!=''){
-    File filebgimg = File(nowbgpathR);
-    //读缓存里的背景图的地址
-    bool imageExists = filebgimg.existsSync();
-    if (imageExists) {
-      print('图片存在');
-      backimgAll = FileImage(filebgimg);//整个APP的背景图
-    } else {
-      print('图片不存在');
-    }
-  }
-
-  //一进入页面热更新部分的操作
-  var upstanum = await StorageUtil.getStringItem('upstanum');//upstanum 1更新步骤走完进来的 0正常进入 2热更新步骤还未走完退出APP后进来的
-  if('$upstanum'=='1'){
-    //热更新APP进来的
-    StorageUtil.setStringItem('upstanum','0');//upstanum 1更新进来的 0正常进入 2热更新步骤还未走完退出APP后进来的
-    // deviceLogAdd(7,"热更新更新成功",'热更新更新成功');
-    // devicehotUpAdd(4);//走接口更新版本热更新的更新状态--更新成功
-    //成功后还要看下当前版本是否跟最后一次MQTT命令的版本一致，如果不一致（最后一次命令的MQTT大于当前版本则判断需要下载），则去更新最后一次MQTT命令的版本
-    expectedChecksum =await StorageUtil.getStringItem('expectedChecksum');// 下载文件的md5值
-    hotdownpath =await StorageUtil.getStringItem('hotdownpath');// 下载文件的位置
-    var nowVsName = await getAndroidManifestVersion();
-    var mqttVsName = await StorageUtil.getStringItem('mqttVsName');// MQTT命令要下载的版本名称（按最后一次发命令为准）
-    var mqttVsNumber = await StorageUtil.getStringItem('mqttVsNumber');// MQTT命令要下载的版本号（按最后一次发命令为准）
-    var invsnum = int.parse('$mqttVsNumber');
-    if('$nowVsName'=='$mqttVsName'){
-      //版本名称一致
-      if(invsnum>myhotversionNum){
-        //大于当前版本再更新
-        StorageUtil.setStringItem('upstanum','2');// 处于热更新的过程中  1更新进来的 0正常进入 2热更新步骤还未走完退出APP后进来的
-        devicehotUpAdd(-4);//走接口更新版本热更新的更新状态--更新失败（进入系统但与最后一次版本不一致）
-        deviceLogAdd(7,"进入系统但与最后一次版本$myhotversionNum不一致继续下载$hotdownpath",'进入系统但与最后一次版本$myhotversionNum不一致继续下载$hotdownpath');
-        downhotfile(1);//下载热更新的文件
-      }else if(invsnum==myhotversionNum){
-        //当前版本跟热更的版本是同版本，则算更新成功
-        deviceLogAdd(7,"热更新更新成功",'热更新更新成功');
-        devicehotUpAdd(4);//走接口更新版本热更新的更新状态--更新成功
-      }
-    }
-  }
-  else if('$upstanum'=='0'){
-    deviceLogAdd(7,"上报一下当前的应用唯一号和版本",'上报一下当前的应用唯一号和版本');
-    deviceNowAdd();//一进系统上报一下当前的应用唯一号和版本
-  }
-  else if('$upstanum'=='2'){
-    // 热更过程中异常退出的，需要继续上一次的热更动作
-    StorageUtil.setStringItem('upstanum','0');//upstanum 1更新进来的 0正常进入 2热更新步骤还未走完退出APP后进来的
-    hotdownpath =await StorageUtil.getStringItem('hotdownpath');// 下载文件的位置
-    expectedChecksum =await StorageUtil.getStringItem('expectedChecksum');// 下载文件的md5值
-    var nowVsName = await getAndroidManifestVersion();
-    var mqttVsName = await StorageUtil.getStringItem('mqttVsName');// MQTT命令要下载的版本名称（按最后一次发命令为准）
-    var mqttVsNumber = await StorageUtil.getStringItem('mqttVsNumber');// MQTT命令要下载的版本号（按最后一次发命令为准）
-    var invsnum = int.parse('$mqttVsNumber');
-    if('$nowVsName'=='$mqttVsName'){
-      //版本名称一致
-      if(invsnum>myhotversionNum){
-        //大于当前版本再更新
-        StorageUtil.setStringItem('upstanum','2');// 处于热更新的过程中  1更新进来的 0正常进入 2热更新步骤还未走完退出APP后进来的
-        deviceLogAdd(7,"进入系统但上次热更异常退出继续下载$hotdownpath",'进入系统但上次热更异常退出继续下载$hotdownpath');
-        downhotfile(1);//下载热更新的文件
-      }
-    }
+  // var nowbgpathR = await StorageUtil.getStringItem('bgImg');//整个APP的背景图的地址
+  // if(nowbgpathR!=null&&nowbgpathR!='null'&&nowbgpathR!=''){
+  //   File filebgimg = File(nowbgpathR);
+  //   //读缓存里的背景图的地址
+  //   bool imageExists = filebgimg.existsSync();
+  //   if (imageExists) {
+  //     print('图片存在');
+  //     backimgAll = FileImage(filebgimg);//整个APP的背景图
+  //   } else {
+  //     print('图片不存在');
+  //   }
+  // }
 
 
-  }
+
   //一进入页面获取缓存里的计划时长的值
   String? playschmess = await StorageUtil.getStringItem('playschmess');
   if(playschmess!=null&&playschmess!='null'&&playschmess!=''){
@@ -944,27 +877,4 @@ sendplschtimeMess(selist){
     }
   });
 }
-//读取U盘的图片背景文件
-getUSBImg() async {
-  if(upanName!=""){
-    try{
-      //安卓7平板设备  3632-D12C是U盘的序列号
-      // var filebgimg = File('/storage/3632-D12C/aaa.txt');//成功读到数据
-      var filebgimg = File('/storage/${upanName}/changeApp/backImg.png');//成功读到数据
-      await Future.delayed(Duration(seconds: 3), (){});
-      dynamic fileContent = await filebgimg.readAsBytes();//读取到文件里的内容
-      var documentDirectory = await getExternalStorageDirectory();
-      var nowpathimg = '${documentDirectory?.path}/nowbgchange.png';//图片的地址
-      var nowfilebgimg = File(nowpathimg);
-      await nowfilebgimg.writeAsBytes(fileContent);
-      backimgAll = FileImage(nowfilebgimg);//更换整个APP的背景图
-      streamchangebg.add('$nowfilebgimg');//更换背景图
-      StorageUtil.setStringItem('bgImg','$nowpathimg');//整个APP的背景图的地址
-    } catch(e){
-      Fluttertoast.showToast(msg: "U盘图片数据获取失败：${e}");
-    }
-  }else{
-    Fluttertoast.showToast(msg: "请填写要读取的U盘图片的U盘名称");
-  }
 
-}

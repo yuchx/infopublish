@@ -3,17 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../Model.dart';
 import '../dataValUse.dart';
-import 'chanOfYisheng.dart';
 //数据更新
 runMeet() {
   var meetList = [];
   var ScheduleTable = ajaxData['ScheduleTable'];
-
   ajaxData['RoomName'] = ajaxData['RoomName'];
-  //print(jsonEncode(ScheduleTable));
   final beforeHaveMeet = '$haveMeet';
   final beforeComOrderId = '${ajaxData['CurrentOrderId']}';
-  //streamMeetThing
   var nowDate = getDataNowNtp();
   if (isNull(ScheduleTable)) {
     haveMeet = false;
@@ -51,7 +47,6 @@ runMeet() {
       var afterDateCom = new DateTime(nowDate.year,nowDate.month,nowDate.day).add(new Duration(hours: 24*meetPreviewInt));
       if (CompareDate(startTimeAgain, nowDateComC) &&CompareDate(afterDateCom, endTimeAgain)) {
         if (statusText != "已结束") {
-//          print(ScheduleTable);
           meetList.add({
             "StartTime": startTime2.substring(0, 16),
             "EndTime": endTime2.substring(11, 16),
@@ -71,23 +66,9 @@ runMeet() {
         ajaxData['CurrentopSign'] = "";
         ajaxData['AllSignPeoNum'] = 0;//所有的签到人数
       }
-//      print(meetList);
     }
   }
-  //
-  // if(posalUrl==''||posalport==''){
-  //   //服务器地址或服务器端口号为空--无颜色--把所有的灯都关上
-  //   lightNoColor();//3个灯都不亮
-  // }else if(havesucccode==0){
-  //   //有后台地址，但是授权没成功
-  //   lightYellow();//未授权--变为黄色（红色+绿色）
-  // }
-  // else if(haveMeet==true){
-  //   //写了后台地址授权成功了
-  //   lightRed();//有会议亮红灯
-  // }else{
-  //   lightGreen();//无会议亮绿灯
-  // }
+
 
   if('$haveMeet'!=beforeHaveMeet||'${ajaxData['CurrentOrderId']}'!=beforeComOrderId){
     //会议状态或正在进行的会议ID和之前不一样
@@ -98,25 +79,7 @@ runMeet() {
   }
   return ajaxData;
 }
-//亮红灯
-Future<void> lightRed() async {
-  //控制侧边灯 GPIO 口：1是绿2是红3是蓝   值：1是关 0是开  开之前先把其余的关上，要不然会出现重合起来的颜色，显示会变得不准
-  //高电平--1 低电平--0
-  var apiVersionNum = await VendorAPI.getApiVersion();
-  var gpioVal1 = await VendorAPI.getGpioValue(1);
-  var gpioVal2 = await VendorAPI.getGpioValue(2);
-  var gpioVal3 = await VendorAPI.getGpioValue(3);
-  if(gpioVal1!="1"){
-    bool? sucVAL1 = await VendorAPI.writeGpioValue(1, '1');//先把口1关闭
-  }
-  if(gpioVal3!="1"){
-    bool? sucVAL2 = await VendorAPI.writeGpioValue(3, '1');//先把口3关闭
-  }
-  if(gpioVal2!="0"){
-    bool? sucVAL3 = await VendorAPI.writeGpioValue(2, '0');//把口2打开
-  }
 
-}
 
 //时间格式化
 String turnTimePass(value) {

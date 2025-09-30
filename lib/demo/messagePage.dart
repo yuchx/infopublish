@@ -7,12 +7,10 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../Model.dart';
 import '../HttpHelper.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import '../FileHelper.dart';
 import '../mqtt/passmdtext.dart';
 import '../shareLocal.dart';
 
 import 'package:flutter/services.dart';
-// import 'package:get_ip/get_ip.dart';
 import '../mqtt/MQTTManager.dart';
 import 'common.dart';
 //获取token
