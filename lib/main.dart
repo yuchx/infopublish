@@ -28,7 +28,7 @@ var metOrderStartTime='';
 var metOrderEndTime='';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(new MyApp());
+  runApp(const MaterialApp(home: Scaffold(body: Center(child: Text('Hello iOS')))));
 }
 class MyApp extends StatefulWidget {
   @override
@@ -632,4 +632,5 @@ class _DynamicClockState extends State<DynamicClock> {
     return new TimerWidget();
   }
 }
+
 
