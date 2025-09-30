@@ -316,27 +316,7 @@ void meetnamechange(val){
 }
 //更改模板样式
 void changetemp(booVal){
-  if(booVal=="0"){
-    havePro=0;//终端只加载会议--有小程序二维码
-    StorageUtil.setIntItem('havePro',havePro);//存储是否有节目
-    streamtemplate.add('$havePro');
-  }else if(booVal=="1"){
-    havePro=1;//终端加载会议和节目
-    StorageUtil.setIntItem('havePro',havePro);//存储是否有节目
-    streamtemplate.add('$havePro');
-  }else if(booVal=="2"){
-    havePro=2;//终端只加载节目
-    StorageUtil.setIntItem('havePro',havePro);//存储是否有节目
-    streamtemplate.add('$havePro');
-  }else if(booVal=="3"){
-    havePro=3;//终端只加载会议--无小程序二维码
-    StorageUtil.setIntItem('havePro',havePro);//存储是否有节目
-    streamtemplate.add('$havePro');
-  }else if(booVal=="4"){
-    havePro=4;//终端只加载会议--摄像头人脸签到版本
-    StorageUtil.setIntItem('havePro',havePro);//存储是否有节目
-    streamtemplate.add('$havePro');
-  }
+ 
 }
 
 getMessageLogin(deviceID){
@@ -874,4 +854,5 @@ sendplschtimeMess(selist){
     }
   });
 }
+
 
