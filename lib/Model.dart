@@ -12,10 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:just_audio/just_audio.dart';
 import 'package:ntp/ntp.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:restart_app/restart_app.dart';
 import 'dart:io';
-import 'custom_channel.dart';
-import 'demo/localfileUseSetting.dart';
 import 'shareLocal.dart';
 import 'HttpHelper.dart';
 import 'package:uuid/uuid.dart';
@@ -149,25 +146,6 @@ Future<Map<String, dynamic>> _readIosDeviceInfo(IosDeviceInfo data) async {
     'SystemVersion': '${data.systemName} ${data.systemVersion}',
   };
 }
-
-
-
-// Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
-//   return <String, dynamic>{
-//     'name': data.name,
-//     'systemName': data.systemName,
-//     'systemVersion': data.systemVersion,
-//     'model': data.model,
-//     'localizedModel': data.localizedModel,
-//     'identifierForVendor': data.identifierForVendor,
-//     'isPhysicalDevice': data.isPhysicalDevice,
-//     'utsname.sysname:': data.utsname.sysname,
-//     'utsname.nodename:': data.utsname.nodename,
-//     'utsname.release:': data.utsname.release,
-//     'utsname.version:': data.utsname.version,
-//     'utsname.machine:': data.utsname.machine,
-//   };
-// }
 
 
 //常见文件a.txt并写入文件内容
@@ -314,11 +292,6 @@ void hideshowhotload(val){
 void meetnamechange(val){
   streamDemo.add('${val}${meetRoomCodeUrl}');
 }
-//更改模板样式
-void changetemp(booVal){
- 
-}
-
 getMessageLogin(deviceID){
   deviceLogAdd(19,"Login去获取token$deviceID","Login去获取token$deviceID");
   var posalUrlGetToken = 'http://$posalUrl:$posalport';
@@ -661,9 +634,7 @@ void getLocalMess() async {
   //   posalUrl='10.0.80.1';
   // }
   posalport = isNullKong(posalportR);
-  // if(posalport==''){
-  //   posalport='9002';
-  // }
+
   devicecode = isNullKong(devicecodeR);
   meetPreview = isNullreKong(meetPreviewR);
   meetName = isNullKong(meetNameR);
@@ -854,5 +825,4 @@ sendplschtimeMess(selist){
     }
   });
 }
-
 

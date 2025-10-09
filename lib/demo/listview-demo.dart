@@ -8,7 +8,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../HttpHelper.dart';
 import '../shareLocal.dart';
-import '../vision_detector_views/cameraSignPart.dart';
 import 'postData.dart';
 import 'theme_base.dart';
 import 'listDate-demo.dart';
@@ -30,48 +29,17 @@ class TimerMeetComWidget extends  StatelessWidget{
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    //streamMeetThing
     return StreamBuilder(
         stream: streamMeetThing.stream,
         builder:(context,snapshot){
-          if(havePro!=4){
-            if(haveMeet==true){
-              //如果有正在进行的会议 1会议+节目  0单会议（现在需要展示会议室的二维码）  2单节目  3单会议无会议二维码（涉外版本）
-              if(havePro==3){
-                return commeetMess(); //有会议正在进行---长条的红色的带快速预约按钮
-              }else{
-                return commeetchangelenMess();//会议正在进行信息长条左边红色边框背景透明--根据模板可改变长度
-              }
-            }else{
-              //没有正在进行的会议--空闲
-              if(havePro==3){
-                //单会议-无二维码
-                return nomeetLenMess();//会议室空闲长条
-              }else{
-                return nomeetchangeLenMess();//会议室空闲长条--根据模板可变宽度
-              }
-
-            }
+          if(haveMeet==true){
+            //如果有正在进行的会议 1会议+节目  0单会议（现在需要展示会议室的二维码）  2单节目  3单会议无会议二维码（涉外版本）
+            return commeetMess(); //有会议正在进行---长条的红色的带快速预约按钮
           }else{
-            //有正在进行的会议但是没有开启签到，开启签到了以后不长这样
-            if(haveMeet==true){
-              if(ajaxData['CurrentopSign']=='true'){
-                //开启签到
-                return commeetsignMess();//开启签到后正在进行的会议的样式
-              }else{
-                //未开启签到
-                return commeetMess(); //有会议正在进行
-              }
-
-            }else{
-              return nomeetLenMess();//会议室空闲长条
-            }
-
+            //没有正在进行的会议--空闲
+            return nomeetLenMess();//会议室空闲长条
           }
         });
-
-
-
   }
 }
 //会议正在进行信息长条---带快速预约按钮
@@ -140,28 +108,6 @@ class commeetMess extends StatelessWidget{
                 ),
               ),
               ksOrdermeetBtn(),//快速预约
-              // Container(
-              //   width: ScreenUtil().setWidth(320),
-              //   padding: EdgeInsets.only(top: ScreenUtil().setHeight(130)),
-              //   child: Container(
-              //     width: ScreenUtil().setWidth(320),
-              //     height: ScreenUtil().setHeight(120),
-              //     alignment: Alignment.center,
-              //     decoration: BoxDecoration(
-              //       border:Border.all(
-              //           color: Color.fromRGBO(255, 255, 255, 1),
-              //           width:ScreenUtil().setWidth(2),
-              //           style: BorderStyle.solid
-              //       ),
-              //         borderRadius: BorderRadius.circular(16.0)
-              //     ),
-              //     child: Text(
-              //       '正在进行',
-              //       style:TextStyle(fontSize: ScreenUtil().setSp(64.0),color: Colors.white,fontWeight: FontWeight.bold,height:1,decoration: TextDecoration.none),
-              //       textAlign: TextAlign.center,
-              //     ),
-              //   ),
-              // )
             ],
           )
       ),
@@ -205,220 +151,6 @@ class nomeetLenMess extends StatelessWidget{
               ksOrdermeetBtn()
             ],
           )
-      ),
-    );
-  }
-
-}
-//会议正在进行信息长条左边红色边框背景透明--根据模板可改变长度
-class commeetchangelenMess extends StatelessWidget{
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return Positioned(
-      top:ScreenUtil().setWidth(273),
-      left: ScreenUtil().setWidth(60),
-      height: ScreenUtil().setHeight(434),
-      width: havePro!=2?ScreenUtil().setWidth(580):ScreenUtil().setWidth(1800),
-      child: Padding(
-        padding: EdgeInsets.all(ScreenUtil().setWidth(10)),
-        child: Container(
-            padding:EdgeInsets.only(left:0),
-            decoration: BoxDecoration(
-              border:Border(
-                left: BorderSide(
-                    color: Color.fromRGBO(255, 85, 85, 1),
-                    width:ScreenUtil().setWidth(20),
-                    style: BorderStyle.solid
-                ),
-              ),
-              gradient: havePro!=2?LinearGradient(colors: [Color(0xFFFF5555),Color(0x00000000)], begin: FractionalOffset(0, 1), end: FractionalOffset(1, 0))
-                  :LinearGradient(colors: [Color(0x66FF5555),Color(0x00000000)], begin: FractionalOffset(0, 1), end: FractionalOffset(1, 0)),
-            ),
-            child: Column(
-              children: <Widget>[
-                Container(
-                  width: havePro!=2?ScreenUtil().setWidth(500):ScreenUtil().setWidth(1720),
-                  margin: EdgeInsets.only(top:ScreenUtil().setHeight(40),bottom:ScreenUtil().setHeight(5),),
-                  child: Text(
-                    '会议进行中',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(32.0),color: Colors.white,fontWeight: FontWeight.bold,height:1,decoration: TextDecoration.none),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                Container(
-                  width: havePro!=2?ScreenUtil().setWidth(500):ScreenUtil().setWidth(1720),
-                  height: ScreenUtil().setHeight(200),
-                  child: Center(
-                    child: Container(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        '${ajaxData['CurrentName']}',
-                        style:TextStyle(fontSize: havePro!=2?ScreenUtil().setSp(48.0):ScreenUtil().setSp(72.0),color: Colors.white,height:1.2,fontWeight: FontWeight.bold,decoration: TextDecoration.none),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  width: havePro!=2?ScreenUtil().setWidth(500):ScreenUtil().setWidth(1720),
-                  margin: EdgeInsets.only(top:ScreenUtil().setHeight(30),bottom:ScreenUtil().setHeight(12),),
-                  child: Text(
-                    "预约者：${ajaxData['CurrentTeacher']}",
-                    style:TextStyle(fontSize: ScreenUtil().setSp(24.0),color: Colors.white,height:1,decoration: TextDecoration.none),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                Container(
-                  width: havePro!=2?ScreenUtil().setWidth(500):ScreenUtil().setWidth(1720),
-                  child: Text(
-                    '${ajaxData['CurrentTime']}',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(24.0),color: Colors.white,fontWeight: FontWeight.bold,decoration: TextDecoration.none),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-              ],
-            )
-        ),
-      ),
-    );
-  }
-
-}
-
-//会议室空闲长条左边框绿色背景透明--根据模板可变宽度
-class nomeetchangeLenMess extends StatelessWidget{
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return Positioned(
-      top:ScreenUtil().setWidth(273),
-      left: ScreenUtil().setWidth(60),
-      height: ScreenUtil().setHeight(434),
-      width: havePro!=2?ScreenUtil().setWidth(580):ScreenUtil().setWidth(1800),
-      child: Padding(
-        padding: EdgeInsets.all(ScreenUtil().setWidth(10)),
-        child: Container(
-            padding:EdgeInsets.only(left:ScreenUtil().setWidth(10)),
-            decoration: BoxDecoration(
-              border:Border(
-                left: BorderSide(
-                    color: Color.fromRGBO(63, 194, 160, 1),
-                    width:ScreenUtil().setWidth(20),
-                    style: BorderStyle.solid
-                ),
-
-              ),
-              gradient: havePro!=2?LinearGradient(colors: [Color(0xFF3FC2A0),Color(0x00000000)], begin: FractionalOffset(0, 1), end: FractionalOffset(1, 0)):
-              LinearGradient(colors: [Color(0x663FC2A0),Color(0x00000000)], begin: FractionalOffset(0, 1), end: FractionalOffset(1, 0)),
-            ),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                    child: Text(
-                      '$meetName空闲中',
-                      style:TextStyle(fontSize: havePro!=2?ScreenUtil().setSp(48.0):ScreenUtil().setSp(72.0),color: Colors.white,fontWeight: FontWeight.bold,decoration: TextDecoration.none),
-                      textAlign: TextAlign.left,
-                    )
-                ),
-              ],
-            )
-        ),
-      ),
-    );
-  }
-
-}
-
-
-//会议正在进行-----摄像头人脸签到
-class commeetsignMess extends StatelessWidget{
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return Positioned(
-      top:ScreenUtil().setWidth(132),
-      left: ScreenUtil().setWidth(32),
-      child:Container(
-        width: ScreenUtil().setWidth(1856),
-        height: ScreenUtil().setHeight(916),
-        decoration: BoxDecoration(
-            color: Color.fromRGBO(255, 255, 255, 0.8),
-            borderRadius: BorderRadius.circular(8.0)
-        ),
-        child: Column(
-          mainAxisAlignment:MainAxisAlignment.start,
-          crossAxisAlignment:CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: ScreenUtil().setHeight(170),
-              width: ScreenUtil().setWidth(1856),
-              padding: EdgeInsets.only(left: ScreenUtil().setWidth(32),right: ScreenUtil().setWidth(40)),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [Color(0x98FF5E5E),Color(
-                    0x98FD8383)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-              ),
-              child: Row(
-                children: [
-                  //会议相关信息
-                  Container(
-                    width: ScreenUtil().setWidth(1430),
-                    child: Column(
-                      mainAxisAlignment:MainAxisAlignment.center,
-                      crossAxisAlignment:CrossAxisAlignment.start,
-                      children: <Widget>[
-                        // SizedBox(height: ScreenUtil().setHeight(109),),
-                        Container(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            '${ajaxData['CurrentName']}',
-                            style:TextStyle(
-                                fontSize: ScreenUtil().setSp(48.0),
-                                color: Colors.white,
-                                height:1.1,
-                                fontWeight: FontWeight.bold,
-                                decoration: TextDecoration.none
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                        ),
-                        SizedBox(height: ScreenUtil().setHeight(16),),
-                        Row(
-                          children: [
-                            Text(
-                              '${ajaxData['CurrentTime']}',
-                              style:TextStyle(fontSize: ScreenUtil().setSp(24.0),color: Colors.white,decoration: TextDecoration.none),
-                              textAlign: TextAlign.left,
-                            ),
-                            Text(
-                              ' / ',
-                              style:TextStyle(fontSize: ScreenUtil().setSp(24.0),color: Colors.white,decoration: TextDecoration.none),
-                              textAlign: TextAlign.left,
-                            ),
-                            Text(
-                              "${ajaxData['CurrentTeacher']}",
-                              style:TextStyle(fontSize: ScreenUtil().setSp(24.0),color: Colors.white,height:1,decoration: TextDecoration.none),
-                              textAlign: TextAlign.left,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  OrderSignPeoNum(),//签到人数情况
-
-                ],
-              ),
-            ),
-            //签到列表
-            Container(
-              width: ScreenUtil().setWidth(1198),
-              height: ScreenUtil().setHeight(746),
-              padding: EdgeInsets.only(top: ScreenUtil().setHeight(16)),
-              child: SignOrderMess(),//签到列表
-            )
-          ],
-        ),
       ),
     );
   }
@@ -1620,120 +1352,6 @@ orderMeetLSLogin(meetTit,Stime,Etime) async {
   });
 }
 
-//下滑选择时间
-// class TimePickerchoo extends StatefulWidget {
-//   @override
-//   _TimePickerChooState createState() => _TimePickerChooState();
-// }
-//
-// class _TimePickerChooState extends State<TimePickerchoo> {
-//   DateTime selectedDate = DateTime.now();
-//   DateTime selectedDateForPicker = DateTime.now();  // 当前日期选择器用的日期
-//   int selectedHour = 0;
-//   int selectedMinute = 0;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     // 计算当前日期、后一天和后两天的日期
-//     List<DateTime> dateOptions = [
-//       selectedDateForPicker,
-//       selectedDateForPicker.add(Duration(days: 1)),
-//       selectedDateForPicker.add(Duration(days: 2)),
-//     ];
-//     return Row(
-//       mainAxisAlignment: MainAxisAlignment.start,
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         SizedBox(width: ScreenUtil().setWidth(115),),
-//         DropdownButton<DateTime>(
-//           value: selectedDateForPicker,
-//           items: dateOptions.map((chdate) {
-//             var nnweek = reWeekText('${chdate.weekday}');
-//             String dateString = '${chdate.month}月${chdate.day}日$nnweek';
-//             return DropdownMenuItem<DateTime>(
-//               value: chdate,
-//               child: Text(
-//                 "$dateString",
-//                 style: TextStyle(
-//                   fontSize: ScreenUtil().setSp(24.0),
-//                   decoration: TextDecoration.none,
-//                   color: Color.fromRGBO(0, 145, 255, 1),
-//                   height: 1.25,
-//                 ),
-//                 textAlign: TextAlign.left,
-//               ),
-//             );
-//           }).toList(),
-//           onChanged: (value) {
-//             setState(() {
-//               selectedDateForPicker = value!;
-//               changeTimeofmeet(selectedDateForPicker,selectedHour,selectedMinute);//
-//             });
-//           },
-//         ),
-//
-//         SizedBox(width: ScreenUtil().setWidth(90),),
-//         DropdownButton<int>(
-//           value: selectedHour,
-//           items: List.generate(24, (index) {
-//             return DropdownMenuItem<int>(
-//               value: index,
-//               child: Text(
-//                 "$index",
-//                 style: TextStyle(
-//                   fontSize: ScreenUtil().setSp(24.0),
-//                   decoration: TextDecoration.none,
-//                   color: Color.fromRGBO(0, 145, 255, 1),
-//                   height: 1.25,
-//                 ),
-//                 textAlign: TextAlign.left,
-//               ),
-//             );
-//           }),
-//           onChanged: (value) {
-//             setState(() {
-//               selectedHour = value!;
-//               changeTimeofmeet(selectedDateForPicker,selectedHour,selectedMinute);//
-//             });
-//           },
-//         ),
-//
-//         SizedBox(width: ScreenUtil().setWidth(90),),
-//         // Minute Picker
-//         DropdownButton<int>(
-//           value: selectedMinute,
-//           items: List.generate(60, (index) {
-//             return DropdownMenuItem<int>(
-//               value: index,
-//               child: Text(
-//                 "$index",
-//                 style: TextStyle(
-//                   fontSize: ScreenUtil().setSp(24.0),
-//                   decoration: TextDecoration.none,
-//                   color: Color.fromRGBO(0, 145, 255, 1),
-//                   height: 1.25,
-//                 ),
-//                 textAlign: TextAlign.left,
-//               ),
-//             );
-//           }),
-//           onChanged: (value) {
-//             setState(() {
-//               selectedMinute = value!;
-//               changeTimeofmeet(selectedDateForPicker,selectedHour,selectedMinute);//
-//             });
-//           },
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-//实时改变选择的时间
-
-
-
-
 class TimePickerchoo extends StatefulWidget {
   @override
   _TimePickerChooState createState() => _TimePickerChooState();
@@ -1914,12 +1532,6 @@ class _TimePickerChooState extends State<TimePickerchoo> {
     );
   }
 }
-
-
-
-
-
-
 
 changeTimeofmeet(DateTime selectedDateForPicker,int hourm,int minm){
   if(chootimePN==1){

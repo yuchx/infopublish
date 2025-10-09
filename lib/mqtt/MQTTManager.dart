@@ -25,23 +25,9 @@ String playproId = '0';//当前播放的节目的ID
 String playscheduleproId = '0';//当前播放的节目的任务ID
 String playType = '0';//节目的类型（0展示空白内容，1下载节目，2播放节目，3下载并加载节目）
 String locaPath = "";
-int certificate = 1;//0无证书 1有证书
-String playinsertId = '0';//当前播放字幕的ID
-//插播的一系列信息--位置速度样式字体色号等
-var insertmess = {
-  "Message": "",//展示的内容
-  "EndTime": "",//插播消息的结束时间
-  "Speed": "",//速度
-  "BackColor": "",//背景色
-  "MessageColor": "",//字的颜色
-  "FontName": "",//字体
-  "FontSize": "",//字号
-  "Dock": ""//滚动位置1上2下3左4右
-};
+int certificate = 0;//0无证书 1有证书
 
 //连接MQTT
-//调节音量的设置（媒体音量）
-// AudioManager audioManager = AudioManager.STREAM_MUSIC;
 void configureindexConnect() async {
   //音量调节种类设置
   // Volume.controlVolume(audioManager);
@@ -66,17 +52,6 @@ void configureindexConnect() async {
     });
   }
 
-  if(posalUrl==''||posalport==''||posalUrl == null||posalUrl=='null'||posalport==null||posalport=='null'){
-    //服务器地址或服务器端口号为空--无颜色--把所有的灯都关上
-    // lightNoColor();//3个灯都不亮
-  }else if(havesucccode==0){
-    //有后台地址，但是授权没成功
-    // lightYellow();//未授权--变为黄色（红色+绿色）
-  }
-  // else if('${ajaxDataValue['RoomName']}'==''||'${ajaxDataValue['RoomName']}'=='null'){
-    //写了后台地址授权成功了--没有配置会议室
-    // lightBlue();//亮蓝色的灯
-  // }
 }
 void getconTimer() {
   //300秒调一次，每5分钟去获取对比一次
@@ -187,7 +162,6 @@ void getconfigchange(type) async{
         if(devAuthorizationCode=='null'){
           devAuthorizationCode='';
         }
-        // var aaa = 'VThkKzc4ZG5WekcxUHJ5bWpwWDE0QT09';
         jiemisqcode(devAuthorizationCode).then((codeouttime) async {
           print(codeouttime);//授权码的过期时间---现在的逻辑是以前的授权码全都废弃，用新的授权码
           int nowtimeAA = gettimeNowNtp().millisecondsSinceEpoch ~/ 1000;//当前时间的毫秒数
@@ -610,21 +584,9 @@ class MQTTManager{
     if(certificate==1){
       _client?.securityContext = context;//安全证书赋值
     }
-
     _client?.setProtocolV311();//安全证书相关
-    // _client.onBadCertificate = (X509Certificate certificate) {
-    //   print('Bad certificate encountered');
-    //   return true;
-    //   // 在这里处理证书验证失败的逻辑
-    // };
-    // _client.onBadCertificate Callback = ((X509 Certificate Cert, String host, int port) => true);
     return 0;
   }
-  // badcertfun(X509Certificate certificate, String host, int port){
-  //   deviceLogAdd(-1,"证书配置错误的返回方法重写",'证书配置错误的返回方法重写');
-  //   return true;
-  // }
-  // Connect to the host
   void connect() async{
     assert(_client != null);
     try {
@@ -708,11 +670,6 @@ class MQTTManager{
           "Disk":"$diskPreDou",
           "SysVolunme":0,
         };
-        //var sendData=jsonEncode({
-        //  "ClientId":datares,
-         // "DataType":1,
-        //  "DataJson":dataJson
-       // });
         var sendData={
           "ClientId":datares,
           "DataType":1,
@@ -831,8 +788,6 @@ class MQTTManager{
       final MqttPublishMessage recMess = c[0].payload as MqttPublishMessage;;
       final String pt =MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       var message = decodeBase64(pt);
-      // print(message);
-      // print('EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
       Map resBefore = json.decode(message);
       if(certificate==1){
         jiemiascwww(resBefore).then((resstr) {
@@ -866,22 +821,6 @@ arrangeMqttMess(res,message) async {
   }
   else if('${res['DataType']}'=='9'){
     deviceLogAdd(9,message,"接收到插播消息的命令！$deviceID");
-    //根据projectId去下载节目的压缩包
-    var datajson = json.decode(res['DataJson']);
-    //返回的数据
-    playinsertId = '1';
-    insertmess = {
-      "Message": "${datajson['Message']}",//展示的内容
-      "EndTime": "${datajson['EndTime']}",//插播消息的结束时间
-      "Speed": "${datajson['Speed']}",//速度
-      "BackColor": "${datajson['BackColor']}",//背景色
-      "MessageColor": "${datajson['MessageColor']}",//字的颜色
-      "FontName": "${datajson['FontName']}",//字体
-      "FontSize": "${datajson['FontSize']}",//字号
-      "Dock": "${datajson['Dock']}"//滚动位置1上2下3左4右
-    };
-    streaminsert.add('$playinsertId');//更改字幕
-
   }
   else if('${res['DataType']}'=='10'){
 
@@ -916,24 +855,6 @@ arrangeMqttMess(res,message) async {
   }
   else if('${res['DataType']}'=='22'){
     deviceLogAdd(22,message,"接收更改APP模板样式的命令！");
-    //接收到是否加载节目的命令
-    if('${res['DataJson']}'=='0'){
-      //加载不带有节目的样式（一整个都是会议）--有会议小程序二维码
-      changetemp("0");
-    }else if('${res['DataJson']}'=='1'){
-      //加载带有节目的样式（一半节目一半会议）
-      changetemp("1");
-    }else if('${res['DataJson']}'=='2'){
-      //加载不带有会议的样式（一整个都是节目）
-      changetemp("2");
-    }else if('${res['DataJson']}'=='3'){
-      //加载不带有节目的样式（一整个都是会议）--无会议小程序二维码--涉外版本
-      changetemp("3");
-    }else if('${res['DataJson']}'=='4'){
-      //加载不带有节目的样式（一整个都是会议）--摄像头人脸签到版本
-      changetemp("4");
-    }
-
   }
   else if('${res['DataType']}'=='29'){
     deviceLogAdd(29,message,"接收更改终端背景的命令！");

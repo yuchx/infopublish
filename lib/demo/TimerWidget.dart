@@ -20,7 +20,6 @@ class TimerWidget extends StatefulWidget {
 }
 
 class _TimerWidgetState extends ClockBaseState<TimerWidget> {
-
   @override
   Widget build(BuildContext context) {
     var WeekDayText = '${now.weekday}';
@@ -61,78 +60,36 @@ class _TimerWidgetState extends ClockBaseState<TimerWidget> {
       }
     }
 
-    if(havePro==3&&havesucccode==1){
-      return Column(
-        children: <Widget>[
-          Container(
-            height:ScreenUtil().setHeight(81),
-            child: Center(
-              child: Text(
-                '${pad0(now.hour)}:${pad0(now.minute)}',
-                style:TextStyle(
-                    fontSize: ScreenUtil().setSp(64),
-                    color: Color.fromRGBO(78, 78, 78, 1),
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.none,
-                    height: 1
-                ),
-                textAlign: TextAlign.left,
+    return Column(
+      children: <Widget>[
+        Container(
+          height:ScreenUtil().setHeight(81),
+          child: Center(
+            child: Text(
+              '${pad0(now.hour)}:${pad0(now.minute)}',
+              style:TextStyle(
+                  fontSize: ScreenUtil().setSp(64),
+                  color: Color.fromRGBO(78, 78, 78, 1),
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.none,
+                  height: 1
               ),
+              textAlign: TextAlign.left,
             ),
-          ),
-          Container(
-            height:ScreenUtil().setHeight(64),
-            margin:EdgeInsets.only(left:ScreenUtil().setHeight(24)),
-            child: Center(
-              child: Text(
-                '${now.year}/${now.month}/${now.day}    $WeekDayTextRead',
-                style:TextStyle(fontSize: ScreenUtil().setSp(32),color: Color.fromRGBO(78, 78, 78, 1),decoration: TextDecoration.none,height:1),
-                textAlign: TextAlign.left,
-              ),
-            ),
-          )
-        ],
-      );
-    }else if(havePro==4&&havesucccode==1){
-      //摄像头签到版本已经授权的
-      return Container(
-        height:ScreenUtil().setHeight(100),
-        child: Center(
-          child: Text(
-            '${pad0(now.hour)}:${pad0(now.minute)}:${pad0(now.second)}  ${now.year}/${now.month}/${now.day}  $WeekDayTextRead',
-            style:TextStyle(fontSize: ScreenUtil().setSp(32),color: Colors.white,decoration: TextDecoration.none,height:1),
-            textAlign: TextAlign.left,
           ),
         ),
-      );
-    }else{
-      return Row(
-        children: <Widget>[
-          Container(
-            height:ScreenUtil().setHeight(90),
-            child: Center(
-              // child: Text(
-              //   '${pad0(now.hour)}:${pad0(now.minute)}',
-              //   style:TextStyle(fontSize: ScreenUtil().setSp(48),color: Colors.white,fontWeight: FontWeight.bold,decoration: TextDecoration.none,height: 1),
-              //   textAlign: TextAlign.left,
-              // ),
+        Container(
+          height:ScreenUtil().setHeight(64),
+          margin:EdgeInsets.only(left:ScreenUtil().setHeight(24)),
+          child: Center(
+            child: Text(
+              '${now.year}/${now.month}/${now.day}    $WeekDayTextRead',
+              style:TextStyle(fontSize: ScreenUtil().setSp(32),color: Color.fromRGBO(78, 78, 78, 1),decoration: TextDecoration.none,height:1),
+              textAlign: TextAlign.left,
             ),
           ),
-          Container(
-            height:ScreenUtil().setHeight(90),
-            margin:EdgeInsets.only(left:ScreenUtil().setHeight(24)),
-            child: Center(
-              // child: Text(
-              //   '${now.year}/${now.month}/${now.day}    $WeekDayTextRead',
-              //   style:TextStyle(fontSize: ScreenUtil().setSp(24),color: Colors.white,decoration: TextDecoration.none,height:1),
-              //   textAlign: TextAlign.left,
-              // ),
-            ),
-          )
-        ],
-      );
-    }
-
-
+        )
+      ],
+    );
   }
 }

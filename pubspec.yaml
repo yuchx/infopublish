@@ -38,29 +38,19 @@ dependencies:
   #  文件加密解密
   aes_crypt_null_safe: 3.0.0
   flutter_local_notifications: 18.0.1
-  flutter_background_service: 5.1.0
   #  音频播放
   just_audio: 0.9.42
-#  audioplayers: any
-  #  mqtt加解密
   encrypt: 5.0.3
   external_path: 1.0.3
-  restart_app: 1.2.0
   #  生成二维码
   qr_flutter: any
   ntp: any
   uuid: 4.5.1
   package_info_plus: ^8.1.2
   intl: any
-  camera: ^0.10.6
-  image_picker: ^1.1.2
   image: any
-  google_mlkit_face_detection:
-    path: google_mlkit_face_detection
 
 dependency_overrides:
-  google_mlkit_commons:
-    path: google_mlkit_commons
 
 dev_dependencies:
   flutter_test:

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import '../Model.dart';
-import '../dataValUse.dart';
 //数据更新
 runMeet() {
   var meetList = [];
@@ -75,7 +74,6 @@ runMeet() {
     SignPeoList = [];//签到人员列表置空
     ajaxData['AllSignPeoNum'] = 0;//所有的签到人数
     streamMeetThing.add('${haveMeet}${ajaxData['CurrentOrderId']}');
-    getSignListofHost();//获取后台已经签到的人员的列表
   }
   return ajaxData;
 }
