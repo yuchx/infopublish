@@ -44,7 +44,7 @@ getDeviceInfo() async {
     await _readAndroidBuildData(androidInfo);
   } else if (Platform.isIOS) {
     IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-    _readIosDeviceInfo(iosInfo);
+    await _readIosDeviceInfo(iosInfo);
   }
 }
 //安卓获取设备信息
