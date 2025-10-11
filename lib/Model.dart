@@ -654,58 +654,6 @@ void getLocalMess() async {
   MqttUser = isNullKong(MqttUserR);
   MqttPassword = isNullKong(MqttPasswordR);
   upanName = isNullKong(upanNameR);
-//上一次的开关屏状态
-//   var lockstateR =await StorageUtil.getStringItem('lockstate');//
-//   isKeptOn = isNullboolLock(lockstateR);//屏幕是否打开,把他的状态缓存到APP中----因为看门狗拉起来的时候有可能是关屏状态
-//   // bool? result = await isLockScreen();//锁着是true  开着是false
-//   bool? result = await myjavaisScreenOn();
-//   if(result==true){
-//     // isKeptOn = false;
-//     isKeptOn = true;
-//   }else{
-//     // isKeptOn = true;
-//     isKeptOn = false;
-//   }
-
-  // var nowbgpathR = await StorageUtil.getStringItem('bgImg');//整个APP的背景图的地址
-  // if(nowbgpathR!=null&&nowbgpathR!='null'&&nowbgpathR!=''){
-  //   File filebgimg = File(nowbgpathR);
-  //   //读缓存里的背景图的地址
-  //   bool imageExists = filebgimg.existsSync();
-  //   if (imageExists) {
-  //     print('图片存在');
-  //     backimgAll = FileImage(filebgimg);//整个APP的背景图
-  //   } else {
-  //     print('图片不存在');
-  //   }
-  // }
-
-
-
-  //一进入页面获取缓存里的计划时长的值
-  String? playschmess = await StorageUtil.getStringItem('playschmess');
-  if(playschmess!=null&&playschmess!='null'&&playschmess!=''){
-    var messplay = json.decode(playschmess);
-    //一进入页面有值说明是之前没有上传过的数据，有值就上传,传值过去以后就清空缓存里的值
-    var sendlist = [
-      {
-        'ScheduleId':'${messplay['scheduleID']}',
-        'ProgramId':'${messplay['proID']}',
-        'DeviceId':'$deviceID',
-        'StartDate':'${messplay['playStart']}',
-        'EndDate':'${messplay['lastplaytime']}',
-        'Duration':'${messplay['Durationtime']}',
-      }
-    ];
-    if(nowplayschMess['scheduleID']==""){
-      //只有是空的时候才是第一次进入APP
-      StorageUtil.setStringItem('playschmess',"");//清空缓存里的值
-      sendplschtimeMess(sendlist);//上传缓存里的数值
-    }
-
-  }else{
-    //本地缓存里没有，不处理
-  }
 
 }
 //字符串的空
@@ -774,51 +722,5 @@ Future<void> checkntpTime() async {
   //   systimeDiff=0;//系统时间与NTP时间的差值 单位ms,NTP服务器为空则
   // }
   systimeDiff=0;//系统时间与NTP时间的差值 单位ms,NTP服务器为空则
-}
-//上传计划播放时长
-sendplschtimeMess(selist){
-  var posalUrlGetToken = 'http://$posalUrl:$posalport';
-  HttpDioHelper helper = HttpDioHelper();
-  var sendmess = {
-    'list':selist
-  };
-  helper.postUrlencodedDio(posalUrlGetToken, "/InfoPublish/RegisterPlayer/ProgramScheduleDetailSubmit",body:sendmess).then((datares) async {
-    if(datares.statusCode!=200){
-      String playsenderrmess = await StorageUtil.getStringItem('playsenderrmess');//之前没提交成功的播放时长的集合
-      if(playsenderrmess!=""&&playsenderrmess!="null"&&playsenderrmess!=null){
-        //如果之前不是空，则需要保存
-        var messplay = json.decode(playsenderrmess);
-        if(messplay.length>200){
-          messplay.removeRange(0, 100);//如果超过200条，就删100条
-        }
-        messplay..addAll(selist);//合并之前缓存里的数组和当前上传的数组
-        var messjsonNowStr = json.encode(messplay);
-        StorageUtil.setStringItem('playsenderrmess', messjsonNowStr);//存在缓存里
-      }else{
-        //如果之前是空，则只需要保存本次没成功的数据
-        var messplay = selist;
-        var messjsonNowStr = json.encode(messplay);
-        StorageUtil.setStringItem('playsenderrmess', messjsonNowStr);//存在缓存里
-      }
-    }else{
-      //上传成功，保存在上传成功后的播放时长集合里
-      String? playsdsucmess = await StorageUtil.getStringItem('playsdsucmess');//之前提交成功的播放时长的集合
-      if(playsdsucmess!=""&&playsdsucmess!="null"&&playsdsucmess!=null){
-        //如果之前不是空，则需要保存
-        var messplay = json.decode(playsdsucmess);
-        if(messplay.length>200){
-          messplay.removeRange(0, 100);//如果超过200条，就删100条
-        }
-        messplay..addAll(selist);//合并之前缓存里的数组和当前上传的数组
-        var messjsonNowStr = json.encode(messplay);
-        StorageUtil.setStringItem('playsdsucmess', messjsonNowStr);//存在缓存里
-      }else{
-        //如果之前是空，则只需要保存本次没成功的数据
-        var messplay = selist;
-        var messjsonNowStr = json.encode(messplay);
-        StorageUtil.setStringItem('playsdsucmess', messjsonNowStr);//存在缓存里
-      }
-    }
-  });
 }
 
