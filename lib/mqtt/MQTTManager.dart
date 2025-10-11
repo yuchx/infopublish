@@ -19,7 +19,6 @@ var connectNum = 1;
 var mytimer;//MQTT发送心跳
 var mymusictimer;//每分钟循环一次播放无声音乐（保活机制有的设备息屏以后不保活）
 var myContimer;//对比版本配置项
-var myplayschtimer;//每S更新最后播放时间
 String proIdOfdownload = '0';//要下载的节目的ID
 String playproId = '0';//当前播放的节目的ID
 String playscheduleproId = '0';//当前播放的节目的任务ID
@@ -61,40 +60,7 @@ void getconTimer() {
     getconfigchange(1);//看看配置项有没有改变
   });
 }
-//每秒钟去更新正在播放的节目的最后播放时间
-void getplayschTimer() {
-  //1秒调一次
-  const period = const Duration(seconds: 1);
-  myplayschtimer = Timer.periodic(period, (timer){
-    //到时回调
-    chalastplaymess();
-  });
-}
-//获取缓存里的当前正在播放的值，并看看计划当前是否正在播放，如果是则更新最后播放时间
-chalastplaymess() async {
-  String? playschmess = await StorageUtil.getStringItem('playschmess');
-  if(playschmess!=null&&playschmess!='null'&&playschmess!=''){
-    var messplay = json.decode(playschmess);
-    if(playscheduleproId=='${messplay['scheduleID']}'){
-      //当前播放的任务ID等于缓存里的任务ID
-      //获取当前时间的时间戳
-      int nowtimeA = gettimeNowNtp().millisecondsSinceEpoch;//当前时间的毫秒数
-      print('$nowtimeA');
-      var starttimelen = '${nowplayschMess['playStart']}';//开始的时间戳
-      int timeaa = int.parse(starttimelen);
-      var durtimenow = nowtimeA-timeaa;//时间差
-      nowplayschMess['lastplaytime'] = '$nowtimeA';//结束时间赋值
-      nowplayschMess['Durationtime'] = '$durtimenow';//持续时间赋值
-      var playschmessStr = json.encode(nowplayschMess);
-      StorageUtil.setStringItem('playschmess', playschmessStr);//存在缓存里
-    }else{
-      //当前正在播的任务ID不等于缓存里的任务ID
-    }
-  }else{
-    //本地缓存里没有正在
-  }
 
-}
 
 //定时获取版本信息有没有改变
 void getconfigchange(type) async{
@@ -408,6 +374,7 @@ void getConVsiAndMess(type) async{
         });
       }else{
         //获取失败 设备未注册等 则在后台还没有授权过，上报设备到后台的未授权设备列表Discovery  model  Key
+        deviceLogAdd(-1, 'Discovery接口${datajaon}', 'Discovery接口${datajaon}');
         if(type==0){
           deviceLogAdd(-1, 'GetDeviceByMachineCode接口获取失败或设备未注册$sendMachineCode', 'GetDeviceByMachineCode接口获取失败或设备未注册$sendMachineCode');
         }
@@ -605,10 +572,6 @@ class MQTTManager{
       var urlPlaylist = 'http://$posalUrl:$posalport';
       //走接口获取当前播放节目
       if(urlPlaylist!='http://'){
-        if(myplayschtimer!=null){
-          myplayschtimer.cancel();//清空每秒钟更新最后播放时间的定时器，之后重新定时
-        }
-        getplayschTimer();//实时更新最后播放时间---不写在这，测试用的，最后需要注释掉
         Future.delayed(Duration(seconds: 3), (){
           //3S后去获取，确保之前缓存里的播放时长可以提交上去
           // getnowsertList(urlPlaylist);//获取当前正在播放的字幕
