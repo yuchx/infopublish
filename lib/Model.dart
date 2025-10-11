@@ -692,16 +692,6 @@ String isNullreKong(value){
   }
 }
 
-//所有下载事件的进度监听（下载节目以及下载热更新文件）
-@pragma('vm:entry-point')
-downloadCallback(String id, int status, int progress) {
-  //走热更新的监听方法
-  SendPort? sendapp = IsolateNameServer.lookupPortByName('newapp_port');
-  sendapp?.send([id, status, progress]);
-  //走节目相关的下载的监听
-  SendPort? send = IsolateNameServer.lookupPortByName('downloader_send_port');
-  send?.send([id, status, progress]);
-}
 //返回当前时间加了NTP差值的
 DateTime getDataNowNtp(){
   return DateTime.now().add(Duration(milliseconds: systimeDiff));
