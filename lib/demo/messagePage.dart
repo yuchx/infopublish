@@ -12,7 +12,6 @@ import '../shareLocal.dart';
 
 import 'package:flutter/services.dart';
 import '../mqtt/MQTTManager.dart';
-import 'common.dart';
 //获取token
 getToken(url,port) async {
     var posalUrlGetToken = 'http://$url:$port';
@@ -142,29 +141,29 @@ registerDevice(url,port,passcode,meetTextName,meetTextPreview,meeturl) async{
 }
 
 //会议的确定
-orderMeet(a,b,c) async{
-  var posalUrlGetMeet = 'http://$a';
-  var userPass={
-    "username":"$b",
-    "password":"$c"
-  };
-  HttpDioHelper helper = HttpDioHelper();
-  helper.httpDioGet(posalUrlGetMeet, "/Mobile/PadLogin",body:userPass).then((datares) {
-    if(datares.statusCode==200){
-      var res = (datares.data);
-      Fluttertoast.showToast(msg: "${res['info']}");
-      StorageUtil.remove('meetUrl');//Token的值
-      StorageUtil.remove('meetUser');//Token的过期时间
-      StorageUtil.remove('meetPassword');//Token的过期时间
-      StorageUtil.setStringItem('meetUrl',a);//Token的值
-      StorageUtil.setStringItem('meetUser',b);//Token的值
-      StorageUtil.setStringItem('meetPassword',c);//Token的值
-    }else{
-      var res = (datares.data);
-      Fluttertoast.showToast(msg: "${res['info']}");
-    }
-  });
-}
+// orderMeet(a,b,c) async{
+//   var posalUrlGetMeet = 'http://$a';
+//   var userPass={
+//     "username":"$b",
+//     "password":"$c"
+//   };
+//   HttpDioHelper helper = HttpDioHelper();
+//   helper.httpDioGet(posalUrlGetMeet, "/Mobile/PadLogin",body:userPass).then((datares) {
+//     if(datares.statusCode==200){
+//       var res = (datares.data);
+//       Fluttertoast.showToast(msg: "${res['info']}");
+//       StorageUtil.remove('meetUrl');//Token的值
+//       StorageUtil.remove('meetUser');//Token的过期时间
+//       StorageUtil.remove('meetPassword');//Token的过期时间
+//       StorageUtil.setStringItem('meetUrl',a);//Token的值
+//       StorageUtil.setStringItem('meetUser',b);//Token的值
+//       StorageUtil.setStringItem('meetPassword',c);//Token的值
+//     }else{
+//       var res = (datares.data);
+//       Fluttertoast.showToast(msg: "${res['info']}");
+//     }
+//   });
+// }
 //没有授权码的注册
 registNocodeDevice(url,port,meetTextName,meetTextPreview,meeturl) async{
   var ipAddressS;
@@ -234,7 +233,7 @@ class _MyTabBarControllerPage extends State<TabBarControllerPage> {
 
     ScreenUtil.init(context, designSize: const Size(1920, 1080));
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         // resizeToAvoidBottomPadding: false,//控制界面内容body,防止键盘弹出后页面比例改变
         //backgroundColor: Colors.transparent, //把scaffold的背景色改成透明
@@ -258,7 +257,6 @@ class _MyTabBarControllerPage extends State<TabBarControllerPage> {
             tabs: <Widget>[
               Tab(text:"配置",),
               Tab(text:"离线日志",),
-              Tab(text:"播放时长统计",),
               // Tab(text:"会议配置"),
             ],
           ),
@@ -268,7 +266,6 @@ class _MyTabBarControllerPage extends State<TabBarControllerPage> {
           children: <Widget>[
             setInforpublish(),
             offAndErrorlog(),//离线异常日志
-            deviceplaytime(),//播放时长统计
             // setMeet(),
           ],
         ),
@@ -1053,309 +1050,3 @@ class offAndErrorlog extends StatelessWidget{
   }
 
 }
-//设备上节目的播放时长
-
-class deviceplaytime extends StatefulWidget{
-  @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
-    return _devStateplaytime();
-  }
-}
-
-class _devStateplaytime extends State<deviceplaytime>{
-  var errorlenlist = [];//上传失败的时长
-  var successlenlist = [];//上传成功的时长
-  @override
-  void initState(){
-    super.initState();
-    initsetaa();
-  }
-  void initsetaa() async {
-    String playsenderrmess = await StorageUtil.getStringItem('playsenderrmess');//之前没提交成功的播放时长的集合
-    if(playsenderrmess!=""&&playsenderrmess!="null"&&playsenderrmess!=null) {
-      //如果之前不是空
-      errorlenlist = json.decode(playsenderrmess);
-    }
-    String playsdsucmess = await StorageUtil.getStringItem('playsdsucmess');//之前没提交成功的播放时长的集合
-    if(playsdsucmess!=""&&playsdsucmess!="null"&&playsdsucmess!=null) {
-      //如果之前不是空
-      successlenlist = json.decode(playsdsucmess);
-    }
-    setState(() {
-    });
-  }
-  Widget playlenbuildGrid(){
-    List<Widget> tiles = [];//先建一个数组用于存放循环生成的widget
-    Widget content; //单独一个widget组件，用于返回需要生成的内容widget
-    var newsendlist = [];
-    // newsendlist..addAll(successlenlist);//合并数组
-    // newsendlist..addAll(errorlenlist);//合并数组
-    // if(newsendlist.length>0){
-    //   newsendlist.sort((a, b) => a['EndDate'].compareTo(b['EndDate']));
-    // }
-
-
-    new List<Widget>.from(errorlenlist.asMap().keys.map((x) {
-      var ScheduleId = errorlenlist[x]['ScheduleId'];//datatype
-      var ProgramId = '${errorlenlist[x]['ProgramId']}';//dataContent
-      var StartDate = '${errorlenlist[x]['StartDate']}';//module
-      var EndDate = '${errorlenlist[x]['EndDate']}';//module
-      var Duration = '${errorlenlist[x]['Duration']}';//module
-      //没有上报成功的播放时长
-      newsendlist.add({
-        'ScheduleId':ScheduleId,
-        'ProgramId':ProgramId,
-        'StartDate':StartDate,
-        'EndDate':EndDate,
-        'Duration':Duration,
-        'state':0,//上报失败的是0
-      });
-
-    })
-    ).toList();
-    new List<Widget>.from(successlenlist.asMap().keys.map((y) {
-      var ScheduleId = successlenlist[y]['ScheduleId'];//datatype
-      var ProgramId = '${successlenlist[y]['ProgramId']}';//dataContent
-      var StartDate = '${successlenlist[y]['StartDate']}';//module
-      var EndDate = '${successlenlist[y]['EndDate']}';//module
-      var Duration = '${successlenlist[y]['Duration']}';//module
-      //没有上报成功的播放时长
-      newsendlist.add({
-        'ScheduleId':ScheduleId,
-        'ProgramId':ProgramId,
-        'StartDate':StartDate,
-        'EndDate':EndDate,
-        'Duration':Duration,
-        'state':1,//上报失败的是0
-      });
-
-    })
-    ).toList();
-    if(newsendlist.length>0){
-      newsendlist.sort((a, b) => b['EndDate'].compareTo(a['EndDate']));
-    }
-    print(newsendlist);
-
-    new List<Widget>.from(newsendlist.asMap().keys.map((a) {
-      var ScheduleId = newsendlist[a]['ScheduleId'];//datatype
-      var ProgramId = '${newsendlist[a]['ProgramId']}';//dataContent
-      var StartDateA = '${newsendlist[a]['StartDate']}';//module
-      var EndDateA = '${newsendlist[a]['EndDate']}';//module
-      var Duration = '${newsendlist[a]['Duration']}';//module
-      var state = '${newsendlist[a]['state']}';//module
-      int StartDateB = int.parse(StartDateA);
-      int EndDateB = int.parse(EndDateA);
-      // 将时间戳转换为 DateTime 对象
-      DateTime StartDateC = DateTime.fromMillisecondsSinceEpoch(StartDateB);
-      DateTime EndDateC = DateTime.fromMillisecondsSinceEpoch(EndDateB);
-      if(ScheduleId=='0'){
-        ScheduleId ='当前无任务';
-      }
-      if(ProgramId=='0'){
-        ProgramId ='当前无节目';
-      }
-      // 格式化时间
-      String StartDate = '${StartDateC.year}/${StartDateC.month}/${StartDateC.day} ${pad0(StartDateC.hour)}:${pad0(StartDateC.minute)}:${pad0(StartDateC.second)}';
-      String EndDate = '${EndDateC.year}/${EndDateC.month}/${EndDateC.day} ${pad0(EndDateC.hour)}:${pad0(EndDateC.minute)}:${pad0(EndDateC.second)}';
-      if(state=='1'){
-        tiles.add(
-          Container(
-            decoration: BoxDecoration(
-              border:Border(
-                bottom: BorderSide(
-                    color: Color.fromRGBO(183, 194, 192, 1.0),
-                    width:ScreenUtil().setWidth(2),
-                    style: BorderStyle.solid
-                ),
-              ),
-            ),
-            padding: EdgeInsets.only(left: ScreenUtil().setWidth(20),right: ScreenUtil().setWidth(20),top:ScreenUtil().setHeight(5),bottom: ScreenUtil().setHeight(5)),
-            child: Row(
-              children: [
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('$ScheduleId',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(20.0),color: Colors.black,height:1.3,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('$ProgramId',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(20.0),color: Colors.black,height:1.3,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('$StartDate $StartDateA',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(20.0),color: Colors.black,height:1.3,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('$EndDate $EndDateA',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(20.0),color: Colors.black,height:1.3,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('$Duration',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(20.0),color: Colors.black,height:1.3,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }else{
-        tiles.add(
-          Container(
-            decoration: BoxDecoration(
-              border:Border(
-                bottom: BorderSide(
-                    color: Color.fromRGBO(183, 194, 192, 1.0),
-                    width:ScreenUtil().setWidth(2),
-                    style: BorderStyle.solid
-                ),
-              ),
-            ),
-            padding: EdgeInsets.only(left: ScreenUtil().setWidth(20),right: ScreenUtil().setWidth(20),top:ScreenUtil().setHeight(5),bottom: ScreenUtil().setHeight(5)),
-            child: Row(
-              children: [
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('$ScheduleId',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(20.0),color: Colors.red,height:1.3,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('$ProgramId',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(20.0),color: Colors.red,height:1.3,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('$StartDate $StartDateA',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(20.0),color: Colors.red,height:1.3,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('$EndDate $EndDateA',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(20.0),color: Colors.red,height:1.3,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('$Duration',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(20.0),color: Colors.red,height:1.3,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-
-    })
-    ).toList();
-
-    content = new Column(
-        children: tiles //重点在这里，因为用编辑器写Column生成的children后面会跟一个<Widget>[]，
-      //此时如果我们直接把生成的tiles放在<Widget>[]中是会报一个类型不匹配的错误，把<Widget>[]删了就可以了
-    );
-    return content;
-
-  }
-
-
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-
-
-    return Container(
-      child: Column(
-        children: [
-          Container(
-            height: ScreenUtil().setHeight(60),
-            padding: EdgeInsets.only(left: ScreenUtil().setWidth(20),right: ScreenUtil().setWidth(20),top:0,bottom: 0),
-            decoration: BoxDecoration(
-              border:Border(
-                bottom: BorderSide(
-                    color: Color.fromRGBO(183, 194, 192, 1.0),
-                    width:ScreenUtil().setWidth(2),
-                    style: BorderStyle.solid
-                ),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('计划id',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(24.0),color: Colors.black,height:1.3,fontWeight: FontWeight.bold,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('节目ID',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(24.0),color: Colors.black,height:1.3,fontWeight: FontWeight.bold,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('开始时间',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(24.0),height:1.3,color: Colors.black,fontWeight: FontWeight.bold,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('结束时间',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(24.0),height:1.3,color: Colors.black,fontWeight: FontWeight.bold,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  width: ScreenUtil().setWidth(356),
-                  child: Text('持续时间（ms）',
-                    style:TextStyle(fontSize: ScreenUtil().setSp(24.0),height:1.3,color: Colors.black,fontWeight: FontWeight.bold,decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              child: ListView(
-                padding: EdgeInsets.all(0),
-                children: [
-                  playlenbuildGrid()
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-}
-
