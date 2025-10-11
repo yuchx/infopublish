@@ -764,20 +764,16 @@ DateTime gettimeNowNtp(){
 }
 //校对时间
 Future<void> checkntpTime() async {
-  DateTime _myTime;
-  DateTime _ntpTime;
-  _myTime = DateTime.now();
-  if(NtpServer!=""){
-    final int offset = await NTP.getNtpOffset(localTime: _myTime, lookUpAddress: '$NtpServer');
-    systimeDiff = offset;//偏差的毫秒数
-    // _ntpTime = _myTime.add(Duration(milliseconds: offset));//NTP的时间
-    // print('My time: $_myTime');
-    // print('NTP time: $_ntpTime');
-    // print('Difference: ${_myTime.difference(_ntpTime).inMilliseconds}ms');
-  }else{
-    systimeDiff=0;//系统时间与NTP时间的差值 单位ms,NTP服务器为空则
-  }
-
+  // DateTime _myTime;
+  // DateTime _ntpTime;
+  // _myTime = DateTime.now();
+  // if(NtpServer!=""){
+  //   final int offset = await NTP.getNtpOffset(localTime: _myTime, lookUpAddress: '$NtpServer');
+  //   systimeDiff = offset;//偏差的毫秒数
+  // }else{
+  //   systimeDiff=0;//系统时间与NTP时间的差值 单位ms,NTP服务器为空则
+  // }
+  systimeDiff=0;//系统时间与NTP时间的差值 单位ms,NTP服务器为空则
 }
 //上传计划播放时长
 sendplschtimeMess(selist){
